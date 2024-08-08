@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <main className="flex-center w-full h-screen bg-custom-image ">
       <div className=" h-full w-full flex flex-col justify-between items-center">
-        <div className="h w-full bg-custom-blue-green  ">
+        <div className="h-full w-full bg-custom-blue-green  ">
           <div className="flex justify-between items-center container h-full py-2">
             <Image src={logo2} alt="TRUMP’S TRIUMPH" width={200} height={200} />
             <Link href={"https://trumptriumphcoin.com/"}>
