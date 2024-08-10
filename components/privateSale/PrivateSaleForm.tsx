@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import PrivateSaleProvider from "./PrivateSaleProvider";
 import ConnectButton from "./ConnectButton";
 import { Separator } from "../ui/separator";
+import Balance from "./Balance";
 
 const PrivateSaleForm = () => {
   return (
@@ -30,10 +31,8 @@ const PrivateSaleForm = () => {
             </div>
             <Separator className="bg-custom-blue h-[3px] mt-2" />
           </div>
-          {/* <div className="bg-custom-blue h-10"></div> */}
+          <Balance />
           <div className="flex flex-col justify-center gap-1 relative">
-            {/* <Input className=" bg-custom-blue h-24 rounded-none text-white text-3xl font-medium" />
-        < */}
             <EthInput />
             <TrtrInput />
             {/* <Input className=" bg-custom-blue h-24 rounded-none text-white text-3xl font-medium" /> */}

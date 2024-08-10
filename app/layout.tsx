@@ -5,6 +5,7 @@ import { cookieToInitialState } from "wagmi";
 import { config } from "@/config";
 import AppKitProvider from "@/context/wagmi";
 import { headers } from "next/headers";
+import { Toaster } from "@/components/ui/sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AppKitProvider initialState={initialState}>{children}</AppKitProvider>
+        <Toaster theme="light" />
       </body>
     </html>
   );

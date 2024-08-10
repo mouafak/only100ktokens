@@ -5,9 +5,17 @@ import PrivateSaleContext from "./context/PrivateSaleContext";
 const PrivateSaleProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
   const [ethValue, setEthValue] = useState("0");
   const [trtrValue, setTrtrValue] = useState("0");
+  const [yourBalance, setYourBalance] = useState("0");
   return (
     <PrivateSaleContext.Provider
-      value={{ ethValue, setEthValue, trtrValue, setTrtrValue }}
+      value={{
+        ethValue,
+        setEthValue,
+        trtrValue,
+        setTrtrValue,
+        yourBalance,
+        setYourBalance,
+      }}
     >
       {children}
     </PrivateSaleContext.Provider>

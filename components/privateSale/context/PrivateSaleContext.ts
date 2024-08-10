@@ -5,6 +5,8 @@ export interface privateSaleContextType {
   setEthValue: React.Dispatch<React.SetStateAction<string>>;
   trtrValue: string;
   setTrtrValue: React.Dispatch<React.SetStateAction<string>>;
+  yourBalance: string;
+  setYourBalance: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const PrivateSaleContext = createContext<privateSaleContextType | null>(null);

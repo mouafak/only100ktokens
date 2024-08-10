@@ -21,8 +21,8 @@ const EthInput = () => {
       required_error: "ETH quantity required",
       invalid_type_error: "The input is invalid",
     })
-    .min(0.001, {
-      message: "ETH amount must be greater than 0.001",
+    .min(0.02, {
+      message: "ETH amount must be greater than 0.02",
     });
 
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
@@ -43,7 +43,12 @@ const EthInput = () => {
   };
   return (
     <div className=" relative flex flex-col bg-custom-blue p-2">
-      <span className="text-white text-sm font-semibold">You pay</span>
+      <div className="flex-center justify-between">
+        <span className="text-white text-sm font-semibold">You pay</span>
+        <span className="text-xs text-custom-yellow font-semibold">
+          1 TRTR = 0.000000000001
+        </span>
+      </div>
       <Input
         onChange={onChangeHandler}
         value={Number(ethValue)}
@@ -51,11 +56,11 @@ const EthInput = () => {
         autoCorrect="off"
         minLength={1}
         maxLength={10}
-        placeholder="0.001"
+        placeholder="0.02"
         pattern="^\d*\.?\d{0,2}$"
         type="number"
         inputMode="decimal"
-        className=" h-16 m-0 bg-custom-blue rounded-none text-white text-3xl font-medium outline-none border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        className=" h-16 m-0 bg-custom-blue rounded-none text-white text-2xl font-medium outline-none border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
       />
       <p className="text-xs text-red-200 h-4 absolute bottom-1 ">{zodError}</p>
       <Image
@@ -63,7 +68,7 @@ const EthInput = () => {
         alt="logo"
         width={48}
         height={48}
-        className="top-1/2 -translate-y-1/2 right-1 absolute"
+        className="top-2/3 -translate-y-2/3 right-1 absolute"
       />
     </div>
   );
