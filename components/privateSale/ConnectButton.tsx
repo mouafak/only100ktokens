@@ -38,8 +38,6 @@ const ConnectButton = () => {
     }
   }, [balance]);
 
-  console.log("balance", balance);
-
   return (
     <div>
       {!isConnected ? (

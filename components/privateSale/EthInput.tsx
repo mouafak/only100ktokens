@@ -7,11 +7,23 @@ import PrivateSaleContext, {
 } from "./context/PrivateSaleContext";
 import Image from "next/image";
 import EthereumLogo from "../../public/ethereum_logo.png";
+import { useAccount, useBalance } from "wagmi";
+import { formatEther } from "viem";
 
 const EthInput = () => {
   const [zodError, setZodError] = useState("");
   // const [ethValue, setEthValue] = useState(0);
-
+  const { address, isConnected } = useAccount();
+  const walletBalance = useBalance({
+    address: address,
+  });
+  const setMax = () => {
+    const b = formatEther(
+      walletBalance.data?.value ? walletBalance.data?.value : BigInt(0)
+    );
+    const bn = Number(b).toFixed(4);
+    setEthValue(String(bn));
+  };
   const { ethValue, setEthValue } = useContext(
     PrivateSaleContext
   ) as privateSaleContextType;
@@ -51,11 +63,11 @@ const EthInput = () => {
       </div>
       <Input
         onChange={onChangeHandler}
-        value={Number(ethValue)}
+        value={ethValue}
         autoComplete="off"
         autoCorrect="off"
-        minLength={1}
-        maxLength={10}
+        //minLength={1}
+        //maxLength={10}
         placeholder="0.02"
         pattern="^\d*\.?\d{0,2}$"
         type="number"
@@ -70,6 +82,14 @@ const EthInput = () => {
         height={48}
         className="top-2/3 -translate-y-2/3 right-1 absolute"
       />
+      <div className=" absolute top-2/3 -translate-y-2/3 right-16 text-white ">
+        <span
+          onClick={setMax}
+          className="bg-custom-yellow py-.5 px-1 text-custom-blue text-sm hover:cursor-pointer hover:bg-custom-blue-green hover:text-white "
+        >
+          max
+        </span>
+      </div>
     </div>
   );
 };

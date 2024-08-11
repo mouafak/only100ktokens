@@ -14,7 +14,7 @@ const TrtrInput = () => {
   useEffect(() => {
     const trtrAmount = Number(ethValue) * 1e12;
     setTrtrValue(trtrAmount.toFixed(2));
-    console.log(trtrAmount);
+    // console.log(trtrAmount);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ethValue]);
   return (

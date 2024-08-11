@@ -3,7 +3,7 @@ import React, { FC, PropsWithChildren, useState } from "react";
 import PrivateSaleContext from "./context/PrivateSaleContext";
 
 const PrivateSaleProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
-  const [ethValue, setEthValue] = useState("0");
+  const [ethValue, setEthValue] = useState("0.02");
   const [trtrValue, setTrtrValue] = useState("0");
   const [yourBalance, setYourBalance] = useState("0");
   return (
