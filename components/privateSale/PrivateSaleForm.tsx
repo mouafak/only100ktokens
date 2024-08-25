@@ -2,17 +2,18 @@ import React from "react";
 import EthInput from "./EthInput";
 import TrtrInput from "./TrtrInput";
 import { ArrowRight } from "lucide-react";
-import { Button } from "../ui/button";
 import PrivateSaleProvider from "./PrivateSaleProvider";
 import ConnectButton from "./ConnectButton";
 import { Separator } from "../ui/separator";
 import Balance from "./Balance";
+import WhiteList from "./WhiteList";
+import DisconnectBtn from "./DisconnectBtn";
 
 const PrivateSaleForm = () => {
   return (
     <PrivateSaleProvider>
-      <div className="w-96 h-[500px] p-1 drop-shadow-md ">
-        <div className="w-full h-full bg-white p-6 flex flex-col justify-between">
+      <div className="w-96 p-1 drop-shadow-md ">
+        <div className="w-full h-full bg-white p-6 flex flex-col justify-between gap-4">
           <div className="flex-center flex-col gap-2">
             <div className="grid grid-cols-3 w-full place-items-center ">
               <Separator className="bg-custom-blue h-[3px] " />
@@ -32,6 +33,7 @@ const PrivateSaleForm = () => {
             <Separator className="bg-custom-blue h-[3px] mt-2" />
           </div>
           <Balance />
+          <WhiteList />
           <div className="flex flex-col justify-center gap-1 relative">
             <EthInput />
             <TrtrInput />
@@ -41,6 +43,7 @@ const PrivateSaleForm = () => {
             </div>
           </div>
           <ConnectButton />
+          <DisconnectBtn />
         </div>
       </div>
     </PrivateSaleProvider>

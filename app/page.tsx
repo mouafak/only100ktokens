@@ -1,6 +1,6 @@
 import PrivateSaleForm from "@/components/privateSale/PrivateSaleForm";
 import Image from "next/image";
-import logo from "@/public/TrumpTriumphLogo.png";
+// import logo from "@/public/TrumpTriumphLogo.png";
 import logo2 from "@/public/logo2.webp";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
