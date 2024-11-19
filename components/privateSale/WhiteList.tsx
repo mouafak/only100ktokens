@@ -8,7 +8,7 @@ const WhiteList = () => {
   const whiteListAccounts = process.env.NEXT_PUBLIC_WHITELIST as string;
   const whiteListArray = whiteListAccounts.split(",");
   const [isWhiteListed, setWhiteListed] = useState(false);
-  console.log(whiteListArray);
+  // console.log(whiteListArray);
 
   useEffect(() => {
     if (isConnected && address && whiteListArray.includes(address)) {
