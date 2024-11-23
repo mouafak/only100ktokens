@@ -48,7 +48,9 @@ const CountdownTimer = ({ targetDate }: CountdownTimerProps) => {
       <div className="flex items-center justify-center gap-4 p-2 text-center flex-grow ">
         {Object.entries(timeLeft).map(([unit, value]) => (
           <div key={unit} className="flex flex-col items-center">
-            <span className="text-gold">{formatTime(value)}</span>
+            <span suppressHydrationWarning className="text-gold">
+              {formatTime(value)}
+            </span>
             <span className="text-xs text-secondary">{unit}</span>
           </div>
         ))}
