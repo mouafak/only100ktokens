@@ -8,10 +8,6 @@ const Providers = ({ children }: { children: ReactNode }) => {
   const environmentId = process.env
     .NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID as string;
 
-  if (!environmentId) {
-    throw new Error("Environment ID not found");
-  }
-
   return (
     <DynamicContextProvider
       theme={"dark"}
