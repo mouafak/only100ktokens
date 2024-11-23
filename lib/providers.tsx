@@ -14,7 +14,7 @@ const Providers = ({ children }: { children: ReactNode }) => {
         environmentId,
         walletConnectors: [SolanaWalletConnectors],
         initialAuthenticationMode: "connect-only",
-        // mobileExperience: "redirect",
+        mobileExperience: "redirect",
         recommendedWallets: [
           { walletKey: "phantom" },
           { walletKey: "okxsolana" },
