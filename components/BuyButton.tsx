@@ -85,14 +85,10 @@ const ConnectWalletButton = () => {
     try {
       await signer.signAndSendTransaction(tx).then(async (res: any) => {
         if (res && res.signature) {
-          const confirmed = await (
+          await (
             await connection
           ).confirmTransaction(res.signature, "confirmed");
-          if (confirmed.value.err) {
-            toast.error("Transaction failed");
-            setIsLoading(false);
-            return;
-          }
+
           await createNewPrivateSale({
             walletAddress: primaryWallet.address,
             solanaValue: solValue,
