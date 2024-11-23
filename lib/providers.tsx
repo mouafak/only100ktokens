@@ -5,8 +5,7 @@ import { SolanaWalletConnectors } from "@dynamic-labs/solana";
 import { ReactNode } from "react";
 
 const Providers = ({ children }: { children: ReactNode }) => {
-  const environmentId = process.env
-    .NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID as string;
+  const environmentId = "eb214338-72ad-42f7-a1fc-4978565acf3c";
 
   return (
     <DynamicContextProvider
