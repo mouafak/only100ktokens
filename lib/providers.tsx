@@ -5,8 +5,10 @@ import { SolanaWalletConnectors } from "@dynamic-labs/solana";
 import { ReactNode } from "react";
 
 const Providers = ({ children }: { children: ReactNode }) => {
-  const environmentId = "eb214338-72ad-42f7-a1fc-4978565acf3c";
-
+  const environmentId =
+    process.env.NODE_ENV == "development"
+      ? "d09629d8-033f-44e5-b0f6-23c42da460f7"
+      : "eb214338-72ad-42f7-a1fc-4978565acf3c";
   return (
     <DynamicContextProvider
       theme={"dark"}

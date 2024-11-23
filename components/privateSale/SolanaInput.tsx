@@ -20,13 +20,15 @@ const SolanaInput = () => {
     setZodError: setZodErrorContext,
   } = useContext(PrivateSaleContext) as privateSaleContextType;
 
+  const solMinValue = process.env.NODE_ENV == "development" ? 0.01 : 0.4;
+
   const schema = z
     .number({
       required_error: "SOL quantity required",
       invalid_type_error: "The input is invalid",
     })
-    .min(0.4, {
-      message: "SOLANA amount must be greater than 0.4 SOL",
+    .min(solMinValue, {
+      message: `SOLANA amount must be greater than ${solMinValue} SOL`,
     });
 
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {

@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import PrivateSaleContext, {
   privateSaleContextType,
 } from "./privateSale/context/PrivateSaleContext";
+import { set } from "zod";
 
 const ConnectWalletButton = () => {
   const { solValue, mskValue, zodError, setRefetchBalance } = useContext(
@@ -27,6 +28,10 @@ const ConnectWalletButton = () => {
   const [walletBalance, setWalletBalance] = useState<string>("0");
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const [buttonText, setButtonText] = useState<
+    "Buy MSK" | "Signing tx" | "Sending SOL" | "Confirming"
+  >("Buy MSK");
 
   const treasuryAddress =
     process.env.NODE_ENV === "development"
@@ -52,65 +57,158 @@ const ConnectWalletButton = () => {
     console.log("primaryWallet", primaryWallet);
   }, [isConnected]);
 
-  const sendSol = async () => {
-    setIsLoading(true);
-    if (primaryWallet && !isSolanaWallet(primaryWallet)) {
+  const sendSolana = async () => {
+    setButtonText("Signing tx");
+    if (
+      !primaryWallet ||
+      !primaryWallet.address ||
+      !isSolanaWallet(primaryWallet)
+    ) {
       console.log("Not a solana wallet");
+      setIsLoading(false);
       return;
     }
 
-    if (!primaryWallet || !primaryWallet.address) {
-      console.log("No wallet address");
-      return;
-    }
-
-    const connection = primaryWallet.getConnection();
-
-    const lastBlock = (await connection).getLatestBlockhash();
-
-    const fromKey = new PublicKey(primaryWallet?.address);
-    const toKey = new PublicKey(treasuryAddress);
-    const solAmount = Number(solValue) * LAMPORTS_PER_SOL;
-    const tx = new Transaction().add(
-      SystemProgram.transfer({
-        fromPubkey: fromKey,
-        toPubkey: toKey,
-        lamports: solAmount,
-      })
-    );
-    tx.recentBlockhash = (await lastBlock).blockhash;
-    tx.feePayer = fromKey;
-
-    const signer: ISolana = await primaryWallet.getSigner();
     try {
-      await signer.signAndSendTransaction(tx).then(async (res: any) => {
-        if (res && res.signature) {
-          await (
-            await connection
-          ).confirmTransaction(res.signature, "confirmed");
+      const connection = primaryWallet.getConnection();
 
-          await createNewPrivateSale({
-            walletAddress: primaryWallet.address,
-            solanaValue: solValue,
-            mskValue: mskValue,
-            txHash: JSON.stringify(res),
-          });
+      const lastBlock = (await connection).getLatestBlockhash();
+
+      const fromKey = new PublicKey(primaryWallet?.address);
+
+      const toKey = new PublicKey(treasuryAddress);
+
+      const solAmount = Number(solValue) * LAMPORTS_PER_SOL;
+
+      const tx = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: fromKey,
+          toPubkey: toKey,
+          lamports: solAmount,
+        })
+      );
+
+      tx.recentBlockhash = (await lastBlock).blockhash;
+
+      tx.feePayer = fromKey;
+
+      const signer: ISolana = await primaryWallet.getSigner();
+
+      const signedTransaction = await signer.signTransaction(tx);
+
+      console.log("signedTransaction", signedTransaction);
+
+      setButtonText("Sending SOL");
+
+      const signature = await (
+        await connection
+      ).sendRawTransaction(signedTransaction.serialize());
+
+      console.log("signature", signature);
+
+      // Poll for transaction confirmation
+      const confirmTimeout = 60_000; // 1 minute timeout
+      const startTime = Date.now();
+      let isConfirmed = null;
+
+      while (Date.now() - startTime < confirmTimeout) {
+        isConfirmed = await (await connection).getSignatureStatus(signature);
+        if (
+          isConfirmed.value &&
+          isConfirmed.value.confirmationStatus === "confirmed"
+        ) {
+          console.log("Transaction confirmed");
+          break;
         }
+        await new Promise((resolve) => setTimeout(resolve, 5000)); // Poll every 5 seconds
+
+        console.log("Polling for confirmation", isConfirmed);
+      } // end while
+
+      setButtonText("Confirming");
+
+      if (
+        !isConfirmed?.value ||
+        isConfirmed.value.confirmationStatus !== "confirmed"
+      ) {
+        toast.error("Transaction failed");
+        setIsLoading(false);
+        return;
+      }
+
+      //  after transaction is confirmed,
+      await createNewPrivateSale({
+        walletAddress: primaryWallet.address,
+        solanaValue: solValue,
+        mskValue: mskValue,
+        txHash: signature,
       });
+
       toast.success("Transaction sent successfully");
+
       setRefetchBalance(true);
+
+      setButtonText("Buy MSK");
     } catch (error) {
       toast.error("Transaction failed");
-      setIsLoading(false);
+      console.log("error", error);
     } finally {
       setIsLoading(false);
+      setButtonText("Buy MSK");
     }
+
+    // const connection = primaryWallet.getConnection();
+
+    // const lastBlock = (await connection).getLatestBlockhash();
+
+    // const fromKey = new PublicKey(primaryWallet?.address);
+    // const toKey = new PublicKey(treasuryAddress);
+    // const solAmount = Number(solValue) * LAMPORTS_PER_SOL;
+    // const tx = new Transaction().add(
+    //   SystemProgram.transfer({
+    //     fromPubkey: fromKey,
+    //     toPubkey: toKey,
+    //     lamports: solAmount,
+    //   })
+    // );
+    // tx.recentBlockhash = (await lastBlock).blockhash;
+    // tx.feePayer = fromKey;
+
+    // const signer: ISolana = await primaryWallet.getSigner();
+    // try {
+    //   await signer.signAndSendTransaction(tx).then(async (res: any) => {
+    //     if (res && res.signature) {
+    //       const confirmed = await (
+    //         await connection
+    //       ).confirmTransaction(res.signature, "confirmed");
+    //       console.log(confirmed);
+    //       if (confirmed.value.err) {
+    //         toast.error("Transaction failed");
+    //         setIsLoading(false);
+    //         return;
+    //       }
+    //       await createNewPrivateSale({
+    //         walletAddress: primaryWallet.address,
+    //         solanaValue: solValue,
+    //         mskValue: mskValue,
+    //         txHash: JSON.stringify(res),
+    //       });
+    //     }
+    //   });
+    //   toast.success("Transaction sent successfully");
+    //   setRefetchBalance(true);
+    // } catch (error) {
+    //   toast.error("Transaction failed");
+    //   setIsLoading(false);
+    // } finally {
+    //   setIsLoading(false);
+    // }
   };
 
   return (
     isConnected && (
       <Button
-        className="rounded-none w-full bg-soft hover:bg-secondary text-foreground disabled:bg-border text-lg flex-center gap-1 "
+        className="rounded-none w-full bg-soft hover:bg-secondary text-foreground disabled:bg-border text-lg flex-center gap-2 "
         size={"lg"}
         disabled={
           !sdkHasLoaded ||
@@ -122,16 +220,16 @@ const ConnectWalletButton = () => {
           solValue === "0" ||
           zodError
         }
-        onClick={() => sendSol()}
+        onClick={() => sendSolana()}
       >
-        {isLoading ? (
+        {buttonText !== "Buy MSK" ? (
           <>
-            <span> Loading </span>
+            <span> {buttonText} ... </span>
             <Loader className="w-4 h-4 animate-spin " />
           </>
         ) : (
           <>
-            <span>Buy MSK</span>
+            <span> {buttonText} </span>
             <span className="text-xs">{walletBalance.toString()} SOL</span>
           </>
         )}
