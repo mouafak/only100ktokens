@@ -26,7 +26,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className={` ${electrolizeFont.className}`}>
         <Providers>{children}</Providers>
-        <Toaster theme="light" />
+        <Toaster theme="dark" position="top-center" />
       </body>
     </html>
   );

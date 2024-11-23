@@ -7,57 +7,53 @@ import PrivateSaleContext, {
 } from "./context/PrivateSaleContext";
 import Image from "next/image";
 import SolanaLogo from "@/public/solanaLogo.png";
+import { useIsLoggedIn } from "@dynamic-labs/sdk-react-core";
 // import { useAccount, useBalance } from "wagmi";
 
 const SolanaInput = () => {
   const [zodError, setZodError] = useState("");
-  // const [ethValue, setEthValue] = useState(0);
+  const isConnected = useIsLoggedIn();
 
-  const walletBalance = 0;
-  // useBalance({
-  //   address: address,
-  // });
-  const setMax = () => {
-    const b = 0;
-    const bn = 0;
-    setSolValue(String(bn));
-  };
-  const { solValue, setSolValue } = useContext(
-    PrivateSaleContext
-  ) as privateSaleContextType;
+  const {
+    solValue,
+    setSolValue,
+    setZodError: setZodErrorContext,
+  } = useContext(PrivateSaleContext) as privateSaleContextType;
 
   const schema = z
     .number({
-      required_error: "ETH quantity required",
+      required_error: "SOL quantity required",
       invalid_type_error: "The input is invalid",
     })
     .min(0.02, {
-      message: "ETH amount must be greater than 0.02",
+      message: "SOL amount must be greater than 0.02",
     });
 
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
     const regex = /^\d*\.?\d{0,4}$/;
-    const ethVal = e.target?.value;
-    const zodParseResult = schema.safeParse(Number(ethVal));
+    const solVal = e.target?.value;
+    const zodParseResult = schema.safeParse(Number(solVal));
     if (!zodParseResult.success) {
       setZodError(zodParseResult.error?.issues[0].message || "");
       console.log(zodParseResult.error?.issues[0].message);
+      setZodErrorContext(true);
     } else {
       setZodError("");
+      setZodErrorContext(false);
     }
 
-    if (regex.test(ethVal)) {
-      setSolValue(ethVal);
-      console.log(ethVal);
+    if (regex.test(solVal)) {
+      setSolValue(solVal);
     }
   };
   return (
     <div className=" relative flex flex-col bg-soft p-2 h-24">
       <div className="flex-center justify-between mb-2">
         <span className="text-white text-sm font-semibold">You pay</span>
-        <span className="text-xs font-semibold">1 MSK = 0.000000000001</span>
+        <span className="text-xs font-semibold">1 SOL = 1 00 000 MSK</span>
       </div>
       <Input
+        disabled={!isConnected}
         onChange={onChangeHandler}
         value={solValue}
         autoComplete="off"
@@ -77,12 +73,12 @@ const SolanaInput = () => {
         className="top-2/3 -translate-y-2/3 right-4 absolute bg-blueDark p-2 w-10 h-10 "
       />
       <div className=" absolute top-2/3 -translate-y-2/3 right-16 text-white ">
-        <span
-          onClick={setMax}
+        {/* <span
+          // onClick={setMax}
           className="bg-custom-yellow py-.5 px-1 text-custom-blue text-sm hover:cursor-pointer hover:bg-custom-blue-green hover:text-white "
         >
           max
-        </span>
+        </span> */}
       </div>
     </div>
   );

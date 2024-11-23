@@ -12,16 +12,16 @@ const MskInput = () => {
   ) as privateSaleContextType;
 
   useEffect(() => {
-    const trtrAmount = Number(solValue) * 1e12;
-    setMskValue(trtrAmount.toFixed(2));
-    // console.log(trtrAmount);
+    const mskAmount = Number(solValue) * 100000;
+    setMskValue(mskAmount.toFixed(0));
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [solValue]);
   return (
     <div className=" relative flex flex-col bg-soft p-2 h-24 justify-center">
       <span className="text-white text-sm font-semibold">You get</span>
       <div className="  m-0 bg-custom-blue rounded-none text-white text-xl font-medium outline-none border-none h-16 flex items-center relative px-2">
-        {mskValue === "" ? "0" : "100000"}
+        {mskValue === "" ? "0" : mskValue}
         <Image
           src={MskLogo}
           alt="logo"

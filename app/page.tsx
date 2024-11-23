@@ -8,13 +8,6 @@ export default function Home() {
       <div className=" h-full w-full flex flex-col justify-between items-center">
         <div className="h-full w-full bg-soft max-h-24 border-b ">
           <div className="flex justify-between items-center container h-full py-2">
-            {/* <Image
-              src={logo2}
-              alt="TRUMP’S TRIUMPH"
-              width={200}
-              height={200}
-              className=" w-32 md:w-48 "
-            /> */}
             <p className="text-lg font-bold font-electrolize">MuskDrive</p>
             <Link href={"https://muskdrive.com/"}>
               <div className="flex gap-1 items-center">

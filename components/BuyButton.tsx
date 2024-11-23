@@ -1,18 +1,37 @@
 "use client";
-import {
-  useDynamicContext,
-  useIsLoggedIn,
-  useSendBalance,
-} from "@dynamic-labs/sdk-react-core";
+import { useDynamicContext, useIsLoggedIn } from "@dynamic-labs/sdk-react-core";
 import { Button } from "./ui/button";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { isSolanaWallet } from "@dynamic-labs/solana";
+import { ISolana } from "@dynamic-labs/solana-core";
+import { PublicKey } from "@solana/web3.js";
+import { Transaction } from "@solana/web3.js";
+import { SystemProgram } from "@solana/web3.js";
+import { Loader } from "lucide-react";
+import { createNewPrivateSale } from "@/app/actions";
+import { toast } from "sonner";
+import PrivateSaleContext, {
+  privateSaleContextType,
+} from "./privateSale/context/PrivateSaleContext";
 
 const ConnectWalletButton = () => {
+  const { solValue, mskValue, zodError, setRefetchBalance } = useContext(
+    PrivateSaleContext
+  ) as privateSaleContextType;
+
   const isConnected = useIsLoggedIn();
 
   const { primaryWallet, sdkHasLoaded, network } = useDynamicContext();
 
   const [walletBalance, setWalletBalance] = useState<string>("0");
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const treasuryAddress =
+    process.env.NODE_ENV === "development"
+      ? (process.env.NEXT_PUBLIC_TREASURY_WALLET_ADDRESS_DEV as string)
+      : (process.env.NEXT_PUBLIC_TREASURY_WALLET_ADDRESS as string);
 
   const getBalance = async () => {
     const balance = await primaryWallet?.getBalance();
@@ -29,19 +48,89 @@ const ConnectWalletButton = () => {
   }, [isConnected, primaryWallet]);
 
   useEffect(() => {
-    console.log(network);
-  }, [network]);
+    console.log("network", network);
+    console.log("primaryWallet", primaryWallet);
+  }, [isConnected]);
+
+  const sendSol = async () => {
+    setIsLoading(true);
+    if (primaryWallet && !isSolanaWallet(primaryWallet)) {
+      console.log("Not a solana wallet");
+      return;
+    }
+
+    if (!primaryWallet || !primaryWallet.address) {
+      console.log("No wallet address");
+      return;
+    }
+
+    const connection = primaryWallet.getConnection();
+
+    const lastBlock = (await connection).getLatestBlockhash();
+
+    const fromKey = new PublicKey(primaryWallet?.address);
+    const toKey = new PublicKey(treasuryAddress);
+    const solAmount = Number(solValue) * LAMPORTS_PER_SOL;
+    const tx = new Transaction().add(
+      SystemProgram.transfer({
+        fromPubkey: fromKey,
+        toPubkey: toKey,
+        lamports: solAmount,
+      })
+    );
+    tx.recentBlockhash = (await lastBlock).blockhash;
+    tx.feePayer = fromKey;
+
+    const signer: ISolana = await primaryWallet.getSigner();
+    try {
+      await signer.signAndSendTransaction(tx).then(async (res: any) => {
+        if (res && res.signature) {
+          await createNewPrivateSale({
+            walletAddress: primaryWallet.address,
+            solanaValue: solValue,
+            mskValue: mskValue,
+            txHash: JSON.stringify(res),
+          });
+        }
+      });
+      toast.success("Transaction sent successfully");
+      setRefetchBalance(true);
+    } catch (error) {
+      toast.error("Transaction failed");
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     isConnected && (
       <Button
         className="rounded-none w-full bg-soft hover:bg-secondary text-foreground disabled:bg-border text-lg flex-center gap-1 "
         size={"lg"}
-        disabled={!sdkHasLoaded || !isConnected}
-        onClick={() => {}}
+        disabled={
+          !sdkHasLoaded ||
+          !isConnected ||
+          isLoading ||
+          !solValue ||
+          !mskValue ||
+          mskValue === "0" ||
+          solValue === "0" ||
+          zodError
+        }
+        onClick={() => sendSol()}
       >
-        <span>Buy MSK</span>
-        <span className="text-xs">{walletBalance.toString()} SOL</span>
+        {isLoading ? (
+          <>
+            <span> Loading </span>
+            <Loader className="w-4 h-4 animate-spin " />
+          </>
+        ) : (
+          <>
+            <span>Buy MSK</span>
+            <span className="text-xs">{walletBalance.toString()} SOL</span>
+          </>
+        )}
       </Button>
     )
   );

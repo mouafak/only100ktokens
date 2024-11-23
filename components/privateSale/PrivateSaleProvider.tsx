@@ -6,6 +6,8 @@ const PrivateSaleProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
   const [solValue, setSolValue] = useState("1");
   const [mskValue, setMskValue] = useState("0");
   const [yourBalance, setYourBalance] = useState("0");
+  const [zodError, setZodError] = useState(false);
+  const [refetchBalance, setRefetchBalance] = useState(false);
   return (
     <PrivateSaleContext.Provider
       value={{
@@ -15,6 +17,10 @@ const PrivateSaleProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
         setMskValue,
         yourBalance,
         setYourBalance,
+        zodError,
+        setZodError,
+        refetchBalance,
+        setRefetchBalance,
       }}
     >
       {children}

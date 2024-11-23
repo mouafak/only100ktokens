@@ -2,6 +2,7 @@
 
 import prisma from "@/prisma";
 import { Prisma, Privatesale } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 
 export const createNewPrivateSale = async ({
   walletAddress,
@@ -22,12 +23,24 @@ export const createNewPrivateSale = async ({
     throw new Error("Solana value is required");
   }
 
-  return await prisma.privatesale.create({
+  const res = await prisma.privatesale.create({
     data: {
       walletAddress,
       solanaValue,
       mskValue,
       txHash,
+    },
+  });
+
+  revalidatePath("/app/page.tsx", "page");
+
+  return res;
+};
+
+export const getBalanceByWaleltAddress = async (walletAddress: string) => {
+  return await prisma.privatesale.findMany({
+    where: {
+      walletAddress,
     },
   });
 };
