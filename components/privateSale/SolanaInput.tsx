@@ -26,7 +26,7 @@ const SolanaInput = () => {
       invalid_type_error: "The input is invalid",
     })
     .min(0.4, {
-      message: "SOL amount must be greater than 0.04",
+      message: "SOLANA amount must be greater than 0.4 SOL",
     });
 
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
