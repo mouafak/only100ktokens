@@ -1,3 +1,4 @@
+import CountdownTimer from "@/components/Countdown";
 import PrivateSaleForm from "@/components/privateSale/PrivateSaleForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";

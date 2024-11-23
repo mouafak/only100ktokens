@@ -8,11 +8,15 @@ import { Separator } from "../ui/separator";
 import Balance from "./Balance";
 import DisconnectBtn from "./DisconnectBtn";
 import BuyButton from "@/components/BuyButton";
+import CountdownTimer from "../Countdown";
 
 const PrivateSaleForm = () => {
   return (
     <PrivateSaleProvider>
-      <div className="w-96 p-1 drop-shadow-md ">
+      <div className="w-96 p-1 flex flex-col gap-2">
+        <div className="border bg-soft">
+          <CountdownTimer targetDate="2024-11-28T23:59:59" />
+        </div>
         <div className="w-full h-full bg-soft p-6 flex flex-col justify-between gap-4 border">
           <div className="flex-center flex-col gap-2">
             <p className="text-sm uppercase">Private Sale</p>
