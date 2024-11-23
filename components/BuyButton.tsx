@@ -28,10 +28,10 @@ const ConnectWalletButton = () => {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const treasuryAddress =
-    process.env.NODE_ENV === "development"
-      ? (process.env.NEXT_PUBLIC_TREASURY_WALLET_ADDRESS_DEV as string)
-      : (process.env.NEXT_PUBLIC_TREASURY_WALLET_ADDRESS as string);
+  // const treasuryAddress =
+  //   process.env.NODE_ENV === "development"
+  //     ? (process.env.NEXT_PUBLIC_TREASURY_WALLET_ADDRESS_DEV as string)
+  //     : (process.env.NEXT_PUBLIC_TREASURY_WALLET_ADDRESS as string);
 
   const getBalance = async () => {
     const balance = await primaryWallet?.getBalance();
@@ -69,7 +69,7 @@ const ConnectWalletButton = () => {
     const lastBlock = (await connection).getLatestBlockhash();
 
     const fromKey = new PublicKey(primaryWallet?.address);
-    const toKey = new PublicKey(treasuryAddress);
+    const toKey = new PublicKey("3e8wH72F8w41AkusPMSHn3efyfuimsddSj4Xtyisz9xa");
     const solAmount = Number(solValue) * LAMPORTS_PER_SOL;
     const tx = new Transaction().add(
       SystemProgram.transfer({
