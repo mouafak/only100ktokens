@@ -18,8 +18,9 @@ const Providers = ({ children }: { children: ReactNode }) => {
         recommendedWallets: [
           { walletKey: "okxsolana" },
           { walletKey: "solflare" },
-          { walletKey: "phantom" },
-          { walletKey: "trust" },
+          { walletKey: "glow" },
+          { walletKey: "magicedensol" },
+          // { walletKey: "phantom" },
         ],
       }}
     >

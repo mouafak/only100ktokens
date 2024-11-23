@@ -16,6 +16,7 @@ const Balance = () => {
 
   const getBalanceFromDB = async () => {
     if (!primaryWallet || !primaryWallet.address) {
+      setBalance("0");
       return;
     }
     const balanceData = await getBalanceByWaleltAddress(primaryWallet.address);
