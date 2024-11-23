@@ -1,18 +1,19 @@
 "use client";
 
-import { useAccount, useDisconnect } from "wagmi";
+import { useDynamicContext, useIsLoggedIn } from "@dynamic-labs/sdk-react-core";
+// import { useAccount, useDisconnect } from "wagmi";
 import { Button } from "../ui/button";
 
 const DisconnectBtn = () => {
-  const { disconnect } = useDisconnect();
-  const { isConnected } = useAccount();
+  const isConnected = useIsLoggedIn();
+  const { handleLogOut } = useDynamicContext();
   return (
     isConnected && (
       <Button
         size={"sm"}
         variant={"link"}
-        className="rounded-none text-custom-red p-0 m-0 h-full"
-        onClick={() => disconnect()}
+        className="rounded-none text-accent p-0 m-0 h-full"
+        onClick={() => handleLogOut()}
       >
         Disconnect
       </Button>

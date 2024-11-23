@@ -1,30 +1,31 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { cookieToInitialState } from "wagmi";
-import { config } from "@/config";
-import AppKitProvider from "@/context/wagmi";
-import { headers } from "next/headers";
 import { Toaster } from "@/components/ui/sonner";
-const inter = Inter({ subsets: ["latin"] });
+import LocalFont from "next/font/local";
+import Providers from "@/lib/providers";
+
+const electrolizeFont = LocalFont({
+  src: "../public/fonts/Electrolize.woff2",
+  variable: "--font-electrolize",
+  style: "normal",
+});
 
 export const metadata: Metadata = {
-  title: "TRUMP'S TRIUMPH",
-  description: "The Meme Coin Supporting Donald Trump",
+  title: "Musk Drive",
+  description:
+    "Join the ride—because with MuskDrive, the future is always in the fast lane!",
 };
 
-export default async function RootLayout(
-  {
-    children,
-  }: Readonly<{
-    children: React.ReactNode;
-  }>
-) {
-  const initialState = cookieToInitialState(config, (await headers()).get("cookie"));
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <AppKitProvider initialState={initialState}>{children}</AppKitProvider>
+      <body className={` ${electrolizeFont.className}`}>
+        <Providers>{children}</Providers>
         <Toaster theme="light" />
       </body>
     </html>

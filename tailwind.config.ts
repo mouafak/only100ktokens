@@ -19,17 +19,17 @@ const config = {
     },
     extend: {
       colors: {
-        border: "hsl(var(--border))",
+        border: "#FFFFFF42",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        foreground: "#D6D6D6",
         primary: {
           DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          foreground: "#D6D6D6",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
+          DEFAULT: "#987BEE",
           foreground: "hsl(var(--secondary-foreground))",
         },
         destructive: {
@@ -41,8 +41,8 @@ const config = {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "#EE7B7B",
+          foreground: "#D6D6D6",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -52,17 +52,15 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        "custom-yellow": {
-          DEFAULT: "hsl(var(--custom-yellow))",
+
+        blueDark: {
+          DEFAULT: "#19104F",
         },
-        "custom-blue": {
-          DEFAULT: "hsl(var(--custom-blue))",
+        gold: {
+          DEFAULT: "#EEC67B",
         },
-        "custom-red": {
-          DEFAULT: "hsl(var(--custom-red))",
-        },
-        "custom-blue-green": {
-          DEFAULT: "hsl(var(--custom-blue-green))",
+        soft: {
+          DEFAULT: "#FFFFFF14",
         },
       },
       borderRadius: {
@@ -85,9 +83,12 @@ const config = {
         "accordion-up": "accordion-up 0.2s ease-out",
       },
       backgroundImage: {
-        "custom-image": "url('/bgPattern.png')",
+        "custom-image": "url('/bg.jpg')",
         "custom-pattern": "url('/percent.png')",
       },
+    },
+    fontFamily: {
+      electrolize: ["var(--font-electrolize)"],
     },
   },
   plugins: [require("tailwindcss-animate")],

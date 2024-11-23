@@ -1,10 +1,10 @@
 import React, { createContext } from "react";
 
 export interface privateSaleContextType {
-  ethValue: string;
-  setEthValue: React.Dispatch<React.SetStateAction<string>>;
-  trtrValue: string;
-  setTrtrValue: React.Dispatch<React.SetStateAction<string>>;
+  solValue: string;
+  setSolValue: React.Dispatch<React.SetStateAction<string>>;
+  mskValue: string;
+  setMskValue: React.Dispatch<React.SetStateAction<string>>;
   yourBalance: string;
   setYourBalance: React.Dispatch<React.SetStateAction<string>>;
 }
