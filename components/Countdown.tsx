@@ -7,7 +7,14 @@ type CountdownTimerProps = {
 };
 
 const CountdownTimer = ({ targetDate }: CountdownTimerProps) => {
-  const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft());
+  const initialTimeLeft = {
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  };
+
+  const [timeLeft, setTimeLeft] = useState(initialTimeLeft);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -15,7 +22,7 @@ const CountdownTimer = ({ targetDate }: CountdownTimerProps) => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [targetDate]);
 
   function calculateTimeLeft() {
     const difference = new Date(targetDate).getTime() - new Date().getTime();
