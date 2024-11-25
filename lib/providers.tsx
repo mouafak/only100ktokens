@@ -18,11 +18,11 @@ const Providers = ({ children }: { children: ReactNode }) => {
         initialAuthenticationMode: "connect-only",
         // mobileExperience: "in-app-browser",
         recommendedWallets: [
-          { walletKey: "okxsolana" },
+          { walletKey: "phantom" },
+          // { walletKey: "okxsolana" },
           { walletKey: "solflare" },
-          { walletKey: "glow" },
-          { walletKey: "magicedensol" },
-          // { walletKey: "phantom" },
+          // { walletKey: "glow" },
+          // { walletKey: "magicedensol" },
         ],
       }}
     >
