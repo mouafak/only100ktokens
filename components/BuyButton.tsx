@@ -156,53 +156,6 @@ const ConnectWalletButton = () => {
       setIsLoading(false);
       setButtonText("Buy MSK");
     }
-
-    // const connection = primaryWallet.getConnection();
-
-    // const lastBlock = (await connection).getLatestBlockhash();
-
-    // const fromKey = new PublicKey(primaryWallet?.address);
-    // const toKey = new PublicKey(treasuryAddress);
-    // const solAmount = Number(solValue) * LAMPORTS_PER_SOL;
-    // const tx = new Transaction().add(
-    //   SystemProgram.transfer({
-    //     fromPubkey: fromKey,
-    //     toPubkey: toKey,
-    //     lamports: solAmount,
-    //   })
-    // );
-    // tx.recentBlockhash = (await lastBlock).blockhash;
-    // tx.feePayer = fromKey;
-
-    // const signer: ISolana = await primaryWallet.getSigner();
-    // try {
-    //   await signer.signAndSendTransaction(tx).then(async (res: any) => {
-    //     if (res && res.signature) {
-    //       const confirmed = await (
-    //         await connection
-    //       ).confirmTransaction(res.signature, "confirmed");
-    //       console.log(confirmed);
-    //       if (confirmed.value.err) {
-    //         toast.error("Transaction failed");
-    //         setIsLoading(false);
-    //         return;
-    //       }
-    //       await createNewPrivateSale({
-    //         walletAddress: primaryWallet.address,
-    //         solanaValue: solValue,
-    //         mskValue: mskValue,
-    //         txHash: JSON.stringify(res),
-    //       });
-    //     }
-    //   });
-    //   toast.success("Transaction sent successfully");
-    //   setRefetchBalance(true);
-    // } catch (error) {
-    //   toast.error("Transaction failed");
-    //   setIsLoading(false);
-    // } finally {
-    //   setIsLoading(false);
-    // }
   };
 
   return (

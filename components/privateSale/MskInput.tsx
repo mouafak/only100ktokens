@@ -12,7 +12,7 @@ const MskInput = () => {
   ) as privateSaleContextType;
 
   useEffect(() => {
-    const mskAmount = Number(solValue) * 100000;
+    const mskAmount = Number(solValue) * 1000000;
     setMskValue(mskAmount.toFixed(0));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

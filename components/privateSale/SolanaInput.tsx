@@ -52,7 +52,7 @@ const SolanaInput = () => {
     <div className=" relative flex flex-col bg-soft p-2 h-24">
       <div className="flex-center justify-between mb-2">
         <span className="text-white text-sm font-semibold">You pay</span>
-        <span className="text-xs font-semibold">1 SOL = 1 00 000 MSK</span>
+        <span className="text-xs font-semibold">1 SOL = 1 000 000 MSK</span>
       </div>
       <Input
         disabled={!isConnected}
