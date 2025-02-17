@@ -13,7 +13,7 @@ export default function Home() {
             <Link passHref href={"https://only100ktokens.com/"}>
               <Image className="w-32 lg:w-44" src={Only100KLogo} alt="Logo" />
             </Link>
-            <Link href={"https://only100ktkens.com/"}>
+            <Link href={"https://only100ktokens.com/"}>
               <div className="flex gap-1 items-center">
                 <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 stroke-white " />
                 <p className="text-white text-sm md:text-base">Back to Home</p>
