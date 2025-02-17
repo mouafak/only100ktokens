@@ -20,7 +20,7 @@ const PrivateSaleForm = () => {
           <CountdownTimer targetDate="2024-11-28T23:59:59" />
         </div>
         <div className="w-full h-full bg-blueSombre p-6 flex flex-col justify-between gap-4">
-          <div className="flex-center flex-col gap-2">
+          <div className="flex-center flex-col">
             <p className="text-sm uppercase">Private Sale</p>
             <Image className="w-32 lg:w-44" src={Only100KLogo} alt="Logo" />
             <div>
