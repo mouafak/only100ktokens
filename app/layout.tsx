@@ -17,9 +17,9 @@ const pressStart2P = LocalFont({
 });
 
 export const metadata: Metadata = {
-  title: "Musk Drive",
+  title: "Only100Ktokens",
   description:
-    "Join the ride—because with MuskDrive, the future is always in the fast lane!",
+    " Be Rare, Be Legendary. Only 100K Tokens – Be Rare, Be Legendary",
 };
 
 export default async function RootLayout({
