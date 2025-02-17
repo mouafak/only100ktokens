@@ -1,6 +1,6 @@
 import React from "react";
 import SolanaInput from "./SolanaInput";
-import MskInput from "./MskInput";
+import MskInput from "./TokenInput";
 import { ArrowRight } from "lucide-react";
 import PrivateSaleProvider from "./PrivateSaleProvider";
 import ConnectButton from "./ConnectButton";
@@ -9,23 +9,23 @@ import Balance from "./Balance";
 import DisconnectBtn from "./DisconnectBtn";
 import BuyButton from "@/components/BuyButton";
 import CountdownTimer from "../Countdown";
+import Image from "next/image";
+import Only100KLogo from "@/public/100kLogoBLue.png";
 
 const PrivateSaleForm = () => {
   return (
     <PrivateSaleProvider>
       <div className="w-96 p-1 flex flex-col gap-2">
-        <div className="border bg-soft">
+        <div className=" bg-blueSombre">
           <CountdownTimer targetDate="2024-11-28T23:59:59" />
         </div>
-        <div className="w-full h-full bg-soft p-6 flex flex-col justify-between gap-4 border">
+        <div className="w-full h-full bg-blueSombre p-6 flex flex-col justify-between gap-4">
           <div className="flex-center flex-col gap-2">
             <p className="text-sm uppercase">Private Sale</p>
-            <h2 className=" text-3xl font-bold text-accent  uppercase">
-              MUSKDRIVE
-            </h2>
+            <Image className="w-32 lg:w-44" src={Only100KLogo} alt="Logo" />
             <div>
               <p className="text-custom-blue-green text-center text-sm ">
-                The Power of Elon Musk, The Force of Efficiency
+                Only 100K Tokens – Be Rare, Be Legendary
               </p>
             </div>
           </div>

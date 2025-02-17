@@ -5,6 +5,8 @@ import { useContext, useEffect, useState } from "react";
 import PrivateSaleContext, {
   privateSaleContextType,
 } from "./context/PrivateSaleContext";
+import Image from "next/image";
+import Only100KLogo from "@/public/100kLogoBLue.png";
 
 const Balance = () => {
   const [balance, setBalance] = useState<string>("0");
@@ -47,9 +49,10 @@ const Balance = () => {
         <p className="text-sm font-semibold text-white">Your Balance :</p>
         <p className="text-sm font-semibold text-gold flex gap-1">
           {balance}
-          <span className="text-[9px] font-bold text-custom-yellow ">
-            <span>MSK</span>
-          </span>
+          {/* <span className="text-[9px] font-bold text-custom-yellow ">
+            <span>O100K</span>
+          </span> */}
+          <Image className="w-14" src={Only100KLogo} alt="Logo" />
         </p>
       </div>
     </div>

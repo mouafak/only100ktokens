@@ -8,6 +8,7 @@ import PrivateSaleContext, {
 import Image from "next/image";
 import SolanaLogo from "@/public/solanaLogo.png";
 import { useIsLoggedIn } from "@dynamic-labs/sdk-react-core";
+import Only100KLogo from "@/public/100kLogoBLue.png";
 // import { useAccount, useBalance } from "wagmi";
 
 const SolanaInput = () => {
@@ -52,7 +53,10 @@ const SolanaInput = () => {
     <div className=" relative flex flex-col bg-soft p-2 h-24">
       <div className="flex-center justify-between mb-2">
         <span className="text-white text-sm font-semibold">You pay</span>
-        <span className="text-xs font-semibold">1 SOL = 1 000 000 MSK</span>
+        <div className="flex items-center">
+          <span className="text-xs font-semibold">1 SOL = 1 000</span>
+          <Image className="w-12" src={Only100KLogo} alt="Logo" />
+        </div>
       </div>
       <Input
         disabled={!isConnected}
@@ -72,7 +76,7 @@ const SolanaInput = () => {
       <Image
         src={SolanaLogo}
         alt="logo"
-        className="top-2/3 -translate-y-2/3 right-4 absolute bg-blueDark p-2 w-10 h-10 "
+        className="top-2/3 -translate-y-2/3 right-4 absolute bg-blueSombre p-2 w-10 h-10 "
       />
       <div className=" absolute top-2/3 -translate-y-2/3 right-16 text-white ">
         {/* <span

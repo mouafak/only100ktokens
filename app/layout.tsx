@@ -10,6 +10,11 @@ const electrolizeFont = LocalFont({
   variable: "--font-electrolize",
   style: "normal",
 });
+const pressStart2P = LocalFont({
+  src: "../public/fonts/PressStart2P-Regular.woff2",
+  variable: "--font-press-start-2p",
+  style: "normal",
+});
 
 export const metadata: Metadata = {
   title: "Musk Drive",
@@ -24,7 +29,11 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={` ${electrolizeFont.className}`}>
+      <body
+        className={` 
+      ${electrolizeFont.className}
+      `}
+      >
         <Providers>{children}</Providers>
         <Toaster theme="dark" position="top-center" />
       </body>

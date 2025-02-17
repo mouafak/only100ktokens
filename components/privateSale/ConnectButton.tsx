@@ -15,7 +15,7 @@ const ConnectButton = () => {
       {!isConnected && (
         <Button
           onClick={() => setShowAuthFlow(true)}
-          className="rounded-none w-full bg-soft hover:bg-secondary text-foreground disabled:bg-border text-lg "
+          className="rounded-none w-full bg-soft hover:bg-blueDarken text-foreground disabled:bg-border text-lg "
           size={"lg"}
           disabled={!sdkHasLoaded}
         >

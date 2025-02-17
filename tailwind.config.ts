@@ -62,6 +62,12 @@ const config = {
         soft: {
           DEFAULT: "#FFFFFF14",
         },
+        blueDarken: {
+          DEFAULT: "#020b1a",
+        },
+        blueSombre: {
+          DEFAULT: "#0c1930",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

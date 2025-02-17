@@ -30,8 +30,8 @@ const ConnectWalletButton = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [buttonText, setButtonText] = useState<
-    "Buy MSK" | "Signing tx" | "Sending SOL" | "Confirming"
-  >("Buy MSK");
+    "Buy Tokens" | "Signing tx" | "Sending SOL" | "Confirming"
+  >("Buy Tokens");
 
   const treasuryAddress =
     process.env.NODE_ENV === "development"
@@ -148,20 +148,20 @@ const ConnectWalletButton = () => {
 
       setRefetchBalance(true);
 
-      setButtonText("Buy MSK");
+      setButtonText("Buy Tokens");
     } catch (error) {
       toast.error("Transaction failed");
       console.log("error", error);
     } finally {
       setIsLoading(false);
-      setButtonText("Buy MSK");
+      setButtonText("Buy Tokens");
     }
   };
 
   return (
     isConnected && (
       <Button
-        className="rounded-none w-full bg-soft hover:bg-secondary text-foreground disabled:bg-border text-lg flex-center gap-2 "
+        className="rounded-none w-full bg-soft hover:bg-blueDarken text-foreground disabled:bg-border text-lg flex-center gap-2 "
         size={"lg"}
         disabled={
           !sdkHasLoaded ||
@@ -175,7 +175,7 @@ const ConnectWalletButton = () => {
         }
         onClick={() => sendSolana()}
       >
-        {buttonText !== "Buy MSK" ? (
+        {buttonText !== "Buy Tokens" ? (
           <>
             <span> {buttonText} ... </span>
             <Loader className="w-4 h-4 animate-spin " />
