@@ -1,11 +1,12 @@
-import { Input } from "../ui/input"
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 
 const PiInput = () => {
   return (
     <div>
-        
-        <Input type="text" className="" />
+      <Label></Label>
+      <Input type="text" className="" />
     </div>
-  )
-}
-export default PiInput
+  );
+};
+export default PiInput;
