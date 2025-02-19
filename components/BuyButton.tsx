@@ -37,6 +37,8 @@ const ConnectWalletButton = () => {
       ? "BTB9qTXEf6z9oYEdsCv6nm9AbCgAbX46o6ekHCwUTfkD"
       : "8Qm6YqtzrRZXNbghw4v79XqUC4rmkq9WrsGA2pQ3zMEG";
 
+  // 8Qm6YqtzrRZXNbghw4v79XqUC4rmkq9WrsGA2pQ3zMEG
+
   const getBalance = async () => {
     const balance = await primaryWallet?.getBalance();
     const handledBalance = balance ? Number(balance).toFixed(2) : "0";

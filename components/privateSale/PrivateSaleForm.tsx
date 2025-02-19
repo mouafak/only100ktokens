@@ -17,17 +17,20 @@ const PrivateSaleForm = () => {
   return (
     <PrivateSaleProvider>
       <div className="w-96 p-1 flex flex-col gap-2">
-        <div className=" bg-blueSombre">
+        {/* <div className=" bg-blueSombre">
           <CountdownTimer targetDate="2024-11-28T23:59:59" />
-        </div>
+        </div> */}
         <div className="w-full h-full bg-blueSombre p-6 flex flex-col justify-between gap-4">
           <div className="flex-center flex-col">
             <p className="text-sm uppercase">Private Sale</p>
             <Image className="w-32 lg:w-44" src={Only100KLogo} alt="Logo" />
             <div>
               <p className="text-custom-blue-green text-center text-xs font-semibold text-gold ">
-                More than 10K PI tokens to earn <br />
-                <span className="">you contribute 1 SOL you earn 1 PI</span>
+                ✨ More than 10K PI Network tokens to earn ✨ <br />
+                <span className="">
+                  you contribute <span className="text-sm"> 1️⃣ </span> SOL you
+                  earn <span className="text-sm"> 1️⃣ </span> PI
+                </span>
               </p>
             </div>
           </div>
