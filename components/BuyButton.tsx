@@ -17,9 +17,8 @@ import PrivateSaleContext, {
 import { set } from "zod";
 
 const ConnectWalletButton = () => {
-  const { solValue, mskValue, zodError, setRefetchBalance } = useContext(
-    PrivateSaleContext
-  ) as privateSaleContextType;
+  const { solValue, tokenValue, piWalletAddress, zodError, setRefetchBalance } =
+    useContext(PrivateSaleContext) as privateSaleContextType;
 
   const isConnected = useIsLoggedIn();
 
@@ -35,8 +34,8 @@ const ConnectWalletButton = () => {
 
   const treasuryAddress =
     process.env.NODE_ENV === "development"
-      ? "3e8wH72F8w41AkusPMSHn3efyfuimsddSj4Xtyisz9xa"
-      : "7qdecvEG3KYkEg5jqHE9nFcLeDWJgXVYajjPwEhKQPs9";
+      ? "BTB9qTXEf6z9oYEdsCv6nm9AbCgAbX46o6ekHCwUTfkD"
+      : "8Qm6YqtzrRZXNbghw4v79XqUC4rmkq9WrsGA2pQ3zMEG";
 
   const getBalance = async () => {
     const balance = await primaryWallet?.getBalance();
@@ -140,8 +139,10 @@ const ConnectWalletButton = () => {
       await createNewPrivateSale({
         walletAddress: primaryWallet.address,
         solanaValue: solValue,
-        mskValue: mskValue,
+        tokenValue: tokenValue,
         txHash: signature,
+        piWalletAddress:
+          piWalletAddress && piWalletAddress !== "" ? piWalletAddress : null,
       });
 
       toast.success("Transaction sent successfully");
@@ -149,6 +150,7 @@ const ConnectWalletButton = () => {
       setRefetchBalance(true);
 
       setButtonText("Buy Tokens");
+      getBalance();
     } catch (error) {
       toast.error("Transaction failed");
       console.log("error", error);
@@ -161,15 +163,15 @@ const ConnectWalletButton = () => {
   return (
     isConnected && (
       <Button
-        className="rounded-none w-full bg-soft hover:bg-blueDarken text-foreground disabled:bg-border text-lg flex-center gap-2 "
+        className="rounded-none w-full bg-soft hover:bg-blueDarken text-foreground disabled:bg-blueDarken/80 text-lg flex-center gap-2 "
         size={"lg"}
         disabled={
           !sdkHasLoaded ||
           !isConnected ||
           isLoading ||
           !solValue ||
-          !mskValue ||
-          mskValue === "0" ||
+          !tokenValue ||
+          tokenValue === "0" ||
           solValue === "0" ||
           zodError
         }

@@ -13,13 +13,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Privatesale {
-  id            Int      @id @default(autoincrement())
-  walletAddress String
-  price         String   @default("10000")
-  solanaValue   String
-  mskValue      String
-  txHash        String   @db.MediumText
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+model PrivateSale {
+  id              Int      @id @default(autoincrement())
+  walletAddress   String
+  price           String   @default("0.1")
+  solanaValue     String
+  tokenValue      String
+  txHash          String   @db.MediumText
+  piWalletAddress String?  @db.MediumText
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

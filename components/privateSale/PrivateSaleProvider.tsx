@@ -4,23 +4,26 @@ import PrivateSaleContext from "./context/PrivateSaleContext";
 
 const PrivateSaleProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
   const [solValue, setSolValue] = useState("1");
-  const [mskValue, setMskValue] = useState("0");
+  const [tokenValue, setTokenValue] = useState("0");
   const [yourBalance, setYourBalance] = useState("0");
   const [zodError, setZodError] = useState(false);
   const [refetchBalance, setRefetchBalance] = useState(false);
+  const [piWalletAddress, setPiWalletAddress] = useState("");
   return (
     <PrivateSaleContext.Provider
       value={{
         solValue,
         setSolValue,
-        mskValue,
-        setMskValue,
+        tokenValue,
+        setTokenValue,
         yourBalance,
         setYourBalance,
         zodError,
         setZodError,
         refetchBalance,
         setRefetchBalance,
+        piWalletAddress,
+        setPiWalletAddress,
       }}
     >
       {children}

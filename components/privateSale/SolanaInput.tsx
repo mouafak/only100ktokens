@@ -1,5 +1,5 @@
 "use client";
-import { ChangeEvent, useContext, useState } from "react";
+import { ChangeEvent, useContext, useEffect, useState } from "react";
 import { z } from "zod";
 import { Input } from "../ui/input";
 import PrivateSaleContext, {
@@ -21,7 +21,7 @@ const SolanaInput = () => {
     setZodError: setZodErrorContext,
   } = useContext(PrivateSaleContext) as privateSaleContextType;
 
-  const solMinValue = process.env.NODE_ENV == "development" ? 0.01 : 0.4;
+  const solMinValue = process.env.NODE_ENV == "development" ? 0.01 : 0.5;
 
   const schema = z
     .number({
@@ -49,13 +49,20 @@ const SolanaInput = () => {
       setSolValue(solVal);
     }
   };
+
+  useEffect(() => {
+    if (!isConnected) {
+      setSolValue("1");
+    }
+  }, [isConnected]);
+
   return (
     <div className=" relative flex flex-col bg-soft p-2 h-24">
       <div className="flex-center justify-between mb-2">
         <span className="text-white text-sm font-semibold">You pay</span>
         <div className="flex items-center">
-          <span className="text-xs font-semibold">1 SOL = 1 000</span>
-          <Image className="w-12" src={Only100KLogo} alt="Logo" />
+          <span className="text-sm font-semibold">1 SOL = 1 0</span>
+          <Image className="w-14" src={Only100KLogo} alt="Logo" />
         </div>
       </div>
       <Input

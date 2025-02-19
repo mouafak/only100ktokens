@@ -24,7 +24,7 @@ const Balance = () => {
     const balanceData = await getBalanceByWaleltAddress(primaryWallet.address);
     if (balanceData.length > 0) {
       const balanceCalculated = balanceData.reduce((acc, curr) => {
-        return acc + Number(curr.mskValue);
+        return acc + Number(curr.tokenValue);
       }, 0);
       setBalance(balanceCalculated.toFixed(0));
     }
