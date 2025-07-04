@@ -1,17 +1,17 @@
-import React from "react";
-import SolanaInput from "./SolanaInput";
-import TokenInput from "./TokenInput";
-import { ArrowRight } from "lucide-react";
-import PrivateSaleProvider from "./PrivateSaleProvider";
-import ConnectButton from "./ConnectButton";
-import { Separator } from "../ui/separator";
-import Balance from "./Balance";
-import DisconnectBtn from "./DisconnectBtn";
-import BuyButton from "@/components/BuyButton";
-import CountdownTimer from "../Countdown";
-import Image from "next/image";
-import Only100KLogo from "@/public/100kLogoBLue.png";
-import PiInput from "./PiInput";
+import React from 'react';
+import SolanaInput from './SolanaInput';
+import TokenInput from './TokenInput';
+import { ArrowRight } from 'lucide-react';
+import PrivateSaleProvider from './PrivateSaleProvider';
+import ConnectButton from './ConnectButton';
+import { Separator } from '../ui/separator';
+import Balance from './Balance';
+import DisconnectBtn from './DisconnectBtn';
+import BuyButton from '@/components/BuyButton';
+import CountdownTimer from '../Countdown';
+import Image from 'next/image';
+import Only100KLogo from '@/public/100kLogoBLue.png';
+import PiInput from './PiInput';
 
 const PrivateSaleForm = () => {
   return (
@@ -23,7 +23,12 @@ const PrivateSaleForm = () => {
         <div className="w-full h-full bg-blueSombre p-6 flex flex-col justify-between gap-4">
           <div className="flex-center flex-col">
             <p className="text-sm uppercase">Private Sale</p>
-            <Image className="w-32 lg:w-44" src={Only100KLogo} alt="Logo" />
+            <Image
+              loading={'lazy'}
+              className="w-32 lg:w-44"
+              src={Only100KLogo}
+              alt="Logo"
+            />
             <div>
               <p className="text-custom-blue-green text-center text-xs font-semibold text-gold ">
                 ✨ More than 10K PI Network tokens to earn ✨ <br />

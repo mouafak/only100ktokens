@@ -1,15 +1,15 @@
-"use client";
-import { getBalanceByWaleltAddress } from "@/app/actions";
-import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
-import { useContext, useEffect, useState } from "react";
+'use client';
+import { getBalanceByWaleltAddress } from '@/app/actions';
+import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
+import { useContext, useEffect, useState } from 'react';
 import PrivateSaleContext, {
   privateSaleContextType,
-} from "./context/PrivateSaleContext";
-import Image from "next/image";
-import Only100KLogo from "@/public/100kLogoBLue.png";
+} from './context/PrivateSaleContext';
+import Image from 'next/image';
+import Only100KLogo from '@/public/100kLogoBLue.png';
 
 const Balance = () => {
-  const [balance, setBalance] = useState<string>("0");
+  const [balance, setBalance] = useState<string>('0');
   const { primaryWallet } = useDynamicContext();
 
   const { refetchBalance, setRefetchBalance } = useContext(
@@ -18,7 +18,7 @@ const Balance = () => {
 
   const getBalanceFromDB = async () => {
     if (!primaryWallet || !primaryWallet.address) {
-      setBalance("0");
+      setBalance('0');
       return;
     }
     const balanceData = await getBalanceByWaleltAddress(primaryWallet.address);
@@ -26,7 +26,7 @@ const Balance = () => {
       const balanceCalculated = balanceData.reduce((acc, curr) => {
         return acc + Number(curr.tokenValue);
       }, 0);
-      setBalance(balanceCalculated.toFixed(0));
+      setBalance(balanceCalculated.toFixed(2));
     }
   };
 
@@ -52,7 +52,12 @@ const Balance = () => {
           {/* <span className="text-[9px] font-bold text-custom-yellow ">
             <span>O100K</span>
           </span> */}
-          <Image className="w-14" src={Only100KLogo} alt="Logo" />
+          <Image
+            loading={'lazy'}
+            className="w-14"
+            src={Only100KLogo}
+            alt="Logo"
+          />
         </p>
       </div>
     </div>

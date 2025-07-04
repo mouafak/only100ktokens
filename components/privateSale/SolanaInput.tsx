@@ -62,7 +62,7 @@ const SolanaInput = () => {
         <span className="text-white text-sm font-semibold">You pay</span>
         <div className="flex items-center">
           <span className="text-sm font-semibold">1 SOL = 1 0</span>
-          <Image className="w-14" src={Only100KLogo} alt="Logo" />
+          <Image loading={"lazy"} className="w-14" src={Only100KLogo} alt="Logo" />
         </div>
       </div>
       <Input
