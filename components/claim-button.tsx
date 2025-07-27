@@ -27,11 +27,6 @@ const ClaimButton = () => {
   const [claimStatus, setClaimStatus] = useState<
     'idle' | 'processing' | 'completed' | 'failed'
   >('idle');
-  const solanaRpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL;
-  if (!solanaRpcUrl) {
-    console.error('Solana RPC URL is not defined in environment variables');
-    return null;
-  }
 
   const {
     setRefetchBalance,
@@ -40,6 +35,12 @@ const ClaimButton = () => {
     setClaimAmount,
     setFeeAmount,
   } = useContext(PrivateSaleContext) as PrivateSaleContextType;
+
+  const solanaRpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL;
+
+  if (!solanaRpcUrl) {
+    throw new Error('Solana RPC URL is not defined in environment variables');
+  }
 
   const sleep = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
