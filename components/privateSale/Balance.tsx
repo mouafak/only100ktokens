@@ -3,7 +3,7 @@ import { getBalanceByWalletAddress } from '@/app/actions';
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import { useContext, useEffect, useState } from 'react';
 import PrivateSaleContext, {
-  privateSaleContextType,
+  PrivateSaleContextType,
 } from './context/PrivateSaleContext';
 import Image from 'next/image';
 import Only100KLogo from '@/public/100kLogoBLue.png';
@@ -14,7 +14,7 @@ const Balance = () => {
 
   const { refetchBalance, setRefetchBalance } = useContext(
     PrivateSaleContext
-  ) as privateSaleContextType;
+  ) as PrivateSaleContextType;
 
   const getBalanceFromDB = async () => {
     if (!primaryWallet || !primaryWallet.address) {
@@ -34,6 +34,7 @@ const Balance = () => {
     if (primaryWallet) {
       getBalanceFromDB();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [primaryWallet]);
 
   useEffect(() => {
@@ -41,6 +42,7 @@ const Balance = () => {
       getBalanceFromDB();
       setRefetchBalance(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refetchBalance]);
 
   return (
