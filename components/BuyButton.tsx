@@ -12,7 +12,7 @@ import { Loader } from 'lucide-react';
 import { createNewPrivateSale } from '@/app/actions';
 import { toast } from 'sonner';
 import PrivateSaleContext, {
-  privateSaleContextType,
+  PrivateSaleContextType,
 } from './privateSale/context/PrivateSaleContext';
 import { set } from 'zod';
 
@@ -25,7 +25,7 @@ const ConnectWalletButton = () => {
     setRefetchBalance,
     setPiWalletAddress,
     setSolValue,
-  } = useContext(PrivateSaleContext) as privateSaleContextType;
+  } = useContext(PrivateSaleContext) as PrivateSaleContextType;
 
   const isConnected = useIsLoggedIn();
 

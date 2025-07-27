@@ -1,7 +1,7 @@
 'use client';
 import React, { useContext, useEffect } from 'react';
 import PrivateSaleContext, {
-  privateSaleContextType,
+  PrivateSaleContextType,
 } from './context/PrivateSaleContext';
 import Image from 'next/image';
 import Only100K from '@/public/100kLogoBLue.png';
@@ -9,7 +9,7 @@ import Only100K from '@/public/100kLogoBLue.png';
 const TokenInput = () => {
   const { solValue, tokenValue, setTokenValue } = useContext(
     PrivateSaleContext
-  ) as privateSaleContextType;
+  ) as PrivateSaleContextType;
 
   useEffect(() => {
     const tokenAmount = Number(solValue) * 10;

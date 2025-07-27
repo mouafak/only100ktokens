@@ -24,3 +24,16 @@ model PrivateSale {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
+
+// this model is used to store claim transactions
+model ClaimTransaction {
+  id            Int      @id @default(autoincrement())
+  walletAddress String
+  solanaValue   String
+  tokenValue    String
+  feeAmount     String
+  txHash        String   @unique @db.VarChar(88)
+  isConfirmed   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

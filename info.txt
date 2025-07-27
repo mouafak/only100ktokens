@@ -1,0 +1,326 @@
+so if i undrestanded how the my custom claim function will be work, this functuon have tow things to do, first take the fee "0.1sol" from user account, after send the amount of tokens to user.
+for sending the fees to treasury wllet, i should initilize the transaction and it will be signing by the user.
+for sending the tokens to the user wallet, i should initialize the transaction, and check if the user have already a token account, and create it if not, after that, i should auto partial siging the transaction by the treasury wallet using the private key and this will happing in server side, after that i will add it the the transaction, the user will sign all transactions once and pay the fees.
+
+
+////////////////////////////////////////
+
+Excellente compréhension! Voici l'implémentation complète de votre logique :
+
+Frontend - Claim Button
+
+'use client';
+
+import { useDynamicContext, useIsLoggedIn } from '@dynamic-labs/sdk-react-core';
+import { Button } from './ui/button';
+import {
+    PublicKey,
+    SystemProgram,
+    Transaction,
+    Connection,
+    VersionedTransaction
+} from '@solana/web3.js';
+import {
+    getAssociatedTokenAddress,
+    createTransferInstruction,
+    createAssociatedTokenAccountInstruction,
+} from '@solana/spl-token';
+import { useState } from 'react';
+
+const ClaimButton = () => {
+    const isConnected = useIsLoggedIn();
+    const { primaryWallet } = useDynamicContext();
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleClaim = async () => {
+        if (!primaryWallet) {
+            throw new Error('Primary wallet is not connected');
+        }
+
+        setIsLoading(true);
+
+        try {
+            const userWallet = primaryWallet.address;
+            const claimAmount = 100; // Montant de tokens à claim
+            const feeAmount = 0.1; // 0.1 SOL de frais
+
+            console.log('Starting claim process for:', userWallet);
+
+            // 1. Appeler votre API pour préparer la transaction
+            const response = await fetch('/api/claim/prepare', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userWallet,
+                    claimAmount,
+                    feeAmount,
+                }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to prepare claim transaction');
+            }
+
+            const { serializedTransaction } = await response.json();
+
+            // 2. Désérialiser la transaction pré-signée par le treasury
+            const transaction = Transaction.from(
+                Buffer.from(serializedTransaction, 'base64')
+            );
+
+            console.log('Transaction prepared, requesting user signature...');
+
+            // 3. L'utilisateur signe la transaction complète (frais + tokens)
+            const signedTransaction = await primaryWallet.signTransaction(transaction);
+
+            // 4. Envoyer la transaction signée pour finalisation
+            const submitResponse = await fetch('/api/claim/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    signedTransaction: Buffer.from(signedTransaction.serialize()).toString('base64'),
+                    userWallet,
+                }),
+            });
+
+            if (!submitResponse.ok) {
+                const error = await submitResponse.json();
+                throw new Error(error.message || 'Failed to submit transaction');
+            }
+
+            const result = await submitResponse.json();
+            console.log('Claim successful! Transaction:', result.signature);
+
+            // TODO: Afficher un message de succès à l'utilisateur
+            alert(`Claim successful! Signature: ${result.signature}`);
+
+        } catch (error) {
+            console.error('Error claiming tokens:', error);
+            // TODO: Afficher un message d'erreur à l'utilisateur
+            alert(`Claim failed: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        isConnected && (
+            <Button 
+        onClick= { handleClaim }
+    disabled = { isLoading }
+    className = "rounded-none w-full bg-soft hover:bg-blueDarken text-foreground disabled:bg-blueDarken/80 text-lg flex-center gap-2"
+        >
+        { isLoading? 'Processing...': 'Claim Now' }
+        </Button>
+    )
+  );
+};
+
+export default ClaimButton;
+
+// //////////////////////////////////////////////////////
+
+API Backend - Préparer la transaction
+
+
+import { NextApiRequest, NextApiResponse } from 'next';
+import {
+    Connection,
+    PublicKey,
+    Transaction,
+    SystemProgram,
+    Keypair
+} from '@solana/web3.js';
+import {
+    createTransferInstruction,
+    getAssociatedTokenAddress,
+    createAssociatedTokenAccountInstruction,
+    getAccount,
+    TokenAccountNotFoundError,
+} from '@solana/spl-token';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    try {
+        const { userWallet, claimAmount, feeAmount } = req.body;
+
+        if (!userWallet || !claimAmount || !feeAmount) {
+            return res.status(400).json({ error: 'Missing required parameters' });
+        }
+
+        // Connexion et configuration
+        const connection = new Connection(process.env.SOLANA_RPC_URL!);
+        const treasuryKeypair = Keypair.fromSecretKey(
+            Buffer.from(process.env.TREASURY_PRIVATE_KEY!, 'base64')
+        );
+
+        const userPubkey = new PublicKey(userWallet);
+        const tokenMint = new PublicKey(process.env.ONLY_100K_TOKENS_ADDRESS!);
+
+        console.log('Preparing claim for user:', userWallet);
+        console.log('Claim amount:', claimAmount, 'Fee:', feeAmount);
+
+        // Créer la transaction
+        const transaction = new Transaction();
+
+        // 1. INSTRUCTION: Frais de claim (SOL) - signé par l'utilisateur
+        const feeInstruction = SystemProgram.transfer({
+            fromPubkey: userPubkey,
+            toPubkey: treasuryKeypair.publicKey,
+            lamports: Math.floor(feeAmount * 1_000_000_000), // Convertir en lamports
+        });
+        transaction.add(feeInstruction);
+
+        // 2. Vérifier si l'utilisateur a un compte de tokens
+        const userTokenAccount = await getAssociatedTokenAddress(tokenMint, userPubkey);
+
+        let userAccountExists = false;
+        try {
+            await getAccount(connection, userTokenAccount);
+            userAccountExists = true;
+            console.log('User token account exists');
+        } catch (error) {
+            if (error instanceof TokenAccountNotFoundError) {
+                console.log('User token account does not exist, will create it');
+                userAccountExists = false;
+            } else {
+                throw error;
+            }
+        }
+
+        // 3. INSTRUCTION: Créer le compte de tokens si nécessaire - payé par l'utilisateur
+        if (!userAccountExists) {
+            const createAccountInstruction = createAssociatedTokenAccountInstruction(
+                userPubkey,           // Payer
+                userTokenAccount,     // Nouveau compte
+                userPubkey,           // Propriétaire
+                tokenMint            // Token
+            );
+            transaction.add(createAccountInstruction);
+            console.log('Added create token account instruction');
+        }
+
+        // 4. INSTRUCTION: Transfert de tokens - signé par le treasury
+        const treasuryTokenAccount = await getAssociatedTokenAddress(
+            tokenMint,
+            treasuryKeypair.publicKey
+        );
+
+        const tokenTransferInstruction = createTransferInstruction(
+            treasuryTokenAccount,    // Source (treasury)
+            userTokenAccount,        // Destination (user)
+            treasuryKeypair.publicKey, // Authority (treasury)
+            claimAmount * Math.pow(10, 9) // Montant (ajustez selon les décimales)
+        );
+        transaction.add(tokenTransferInstruction);
+
+        // 5. Définir les métadonnées de la transaction
+        const { blockhash } = await connection.getLatestBlockhash('confirmed');
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = userPubkey; // L'utilisateur paie les frais de transaction
+
+        // 6. SIGNATURE PARTIELLE par le treasury (côté serveur)
+        transaction.partialSign(treasuryKeypair);
+        console.log('Treasury signature added');
+
+        // 7. Sérialiser la transaction pour envoi au client
+        const serializedTransaction = transaction.serialize({
+            requireAllSignatures: false
+        });
+
+        console.log('Transaction prepared successfully');
+
+        res.status(200).json({
+            serializedTransaction: Buffer.from(serializedTransaction).toString('base64'),
+            message: 'Transaction prepared successfully'
+        });
+
+    } catch (error) {
+        console.error('Error preparing claim transaction:', error);
+        res.status(500).json({
+            error: 'Failed to prepare transaction',
+            details: error.message
+        });
+    }
+}
+
+
+// //////////////////////////////////////////////////////
+API Backend - Soumettre la transaction
+
+import { NextApiRequest, NextApiResponse } from 'next';
+import { Connection, Transaction } from '@solana/web3.js';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    try {
+        const { signedTransaction, userWallet } = req.body;
+
+        if (!signedTransaction || !userWallet) {
+            return res.status(400).json({ error: 'Missing required parameters' });
+        }
+
+        const connection = new Connection(process.env.SOLANA_RPC_URL!);
+
+        // Désérialiser la transaction signée par l'utilisateur
+        const transaction = Transaction.from(
+            Buffer.from(signedTransaction, 'base64')
+        );
+
+        console.log('Submitting transaction for user:', userWallet);
+
+        // Envoyer la transaction au réseau Solana
+        const signature = await connection.sendRawTransaction(
+            transaction.serialize(),
+            {
+                skipPreflight: false,
+                preflightCommitment: 'confirmed',
+            }
+        );
+
+        // Attendre la confirmation
+        const confirmation = await connection.confirmTransaction(
+            signature,
+            'confirmed'
+        );
+
+        if (confirmation.value.err) {
+            throw new Error(`Transaction failed: ${confirmation.value.err}`);
+        }
+
+        console.log('Transaction confirmed:', signature);
+
+        res.status(200).json({
+            signature,
+            message: 'Claim successful',
+            confirmed: true
+        });
+
+    } catch (error) {
+        console.error('Error submitting transaction:', error);
+        res.status(500).json({
+            error: 'Failed to submit transaction',
+            details: error.message
+        });
+    }
+}
+
+// ////////////////////////////////////////////////////
+Résumé du flux:
+Frontend: Utilisateur clique sur "Claim Now"
+API / prepare : Crée transaction avec frais + tokens, signe partiellement avec treasury
+Frontend: Utilisateur signe la transaction complète
+API / submit : Envoie la transaction au réseau Solana
+Résultat: Utilisateur reçoit ses tokens, paie les frais
+Sécurité: La clé privée du treasury reste côté serveur, l'utilisateur ne signe qu'une seule fois!

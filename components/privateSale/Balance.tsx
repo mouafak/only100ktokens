@@ -1,5 +1,5 @@
 'use client';
-import { getBalanceByWaleltAddress } from '@/app/actions';
+import { getBalanceByWalletAddress } from '@/app/actions';
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import { useContext, useEffect, useState } from 'react';
 import PrivateSaleContext, {
@@ -21,7 +21,7 @@ const Balance = () => {
       setBalance('0');
       return;
     }
-    const balanceData = await getBalanceByWaleltAddress(primaryWallet.address);
+    const balanceData = await getBalanceByWalletAddress(primaryWallet.address);
     if (balanceData.length > 0) {
       const balanceCalculated = balanceData.reduce((acc, curr) => {
         return acc + Number(curr.tokenValue);

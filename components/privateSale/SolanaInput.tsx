@@ -1,32 +1,32 @@
-"use client";
-import { ChangeEvent, useContext, useEffect, useState } from "react";
-import { z } from "zod";
-import { Input } from "../ui/input";
+'use client';
+import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { z } from 'zod';
+import { Input } from '../ui/input';
 import PrivateSaleContext, {
-  privateSaleContextType,
-} from "./context/PrivateSaleContext";
-import Image from "next/image";
-import SolanaLogo from "@/public/solanaLogo.png";
-import { useIsLoggedIn } from "@dynamic-labs/sdk-react-core";
-import Only100KLogo from "@/public/100kLogoBLue.png";
+  PrivateSaleContextType,
+} from './context/PrivateSaleContext';
+import Image from 'next/image';
+import SolanaLogo from '@/public/solanaLogo.png';
+import { useIsLoggedIn } from '@dynamic-labs/sdk-react-core';
+import Only100KLogo from '@/public/100kLogoBLue.png';
 // import { useAccount, useBalance } from "wagmi";
 
 const SolanaInput = () => {
-  const [zodError, setZodError] = useState("");
+  const [zodError, setZodError] = useState('');
   const isConnected = useIsLoggedIn();
 
   const {
     solValue,
     setSolValue,
     setZodError: setZodErrorContext,
-  } = useContext(PrivateSaleContext) as privateSaleContextType;
+  } = useContext(PrivateSaleContext) as PrivateSaleContextType;
 
-  const solMinValue = process.env.NODE_ENV == "development" ? 0.01 : 0.5;
+  const solMinValue = process.env.NODE_ENV == 'development' ? 0.01 : 0.5;
 
   const schema = z
     .number({
-      required_error: "SOL quantity required",
-      invalid_type_error: "The input is invalid",
+      required_error: 'SOL quantity required',
+      invalid_type_error: 'The input is invalid',
     })
     .min(solMinValue, {
       message: `SOLANA amount must be greater than ${solMinValue} SOL`,
@@ -37,11 +37,11 @@ const SolanaInput = () => {
     const solVal = e.target?.value;
     const zodParseResult = schema.safeParse(Number(solVal));
     if (!zodParseResult.success) {
-      setZodError(zodParseResult.error?.issues[0].message || "");
+      setZodError(zodParseResult.error?.issues[0].message || '');
       console.log(zodParseResult.error?.issues[0].message);
       setZodErrorContext(true);
     } else {
-      setZodError("");
+      setZodError('');
       setZodErrorContext(false);
     }
 
@@ -52,7 +52,7 @@ const SolanaInput = () => {
 
   useEffect(() => {
     if (!isConnected) {
-      setSolValue("1");
+      setSolValue('1');
     }
   }, [isConnected]);
 
@@ -62,7 +62,12 @@ const SolanaInput = () => {
         <span className="text-white text-sm font-semibold">You pay</span>
         <div className="flex items-center">
           <span className="text-sm font-semibold">1 SOL = 1 0</span>
-          <Image loading={"lazy"} className="w-14" src={Only100KLogo} alt="Logo" />
+          <Image
+            loading={'lazy'}
+            className="w-14"
+            src={Only100KLogo}
+            alt="Logo"
+          />
         </div>
       </div>
       <Input
