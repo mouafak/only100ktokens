@@ -5,7 +5,7 @@ import { useDynamicContext, useIsLoggedIn } from "@dynamic-labs/sdk-react-core";
 import { Button } from "../ui/button";
 import { useContext } from "react";
 import PrivateSaleContext, {
-  privateSaleContextType,
+  PrivateSaleContextType,
 } from "./context/PrivateSaleContext";
 
 const DisconnectBtn = () => {
@@ -13,7 +13,7 @@ const DisconnectBtn = () => {
   const { handleLogOut } = useDynamicContext();
   const { setRefetchBalance } = useContext(
     PrivateSaleContext
-  ) as privateSaleContextType;
+  ) as PrivateSaleContextType;
   return (
     isConnected && (
       <Button

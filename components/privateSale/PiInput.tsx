@@ -1,18 +1,18 @@
-"use client";
-import { use, useContext, useEffect, useState } from "react";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+'use client';
+import { use, useContext, useEffect, useState } from 'react';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 import PrivateSaleContext, {
-  privateSaleContextType,
-} from "./context/PrivateSaleContext";
-import { useIsLoggedIn } from "@dynamic-labs/sdk-react-core";
+  PrivateSaleContextType,
+} from './context/PrivateSaleContext';
+import { useIsLoggedIn } from '@dynamic-labs/sdk-react-core';
 
 const PiInput = () => {
   const isConnected = useIsLoggedIn();
   const [canAddPiWalletAddress, setCanAddPiWalletAddress] = useState(false);
   const { piWalletAddress, setPiWalletAddress, solValue } = useContext(
     PrivateSaleContext
-  ) as privateSaleContextType;
+  ) as PrivateSaleContextType;
 
   const onChangeHandler = (e: any) => {
     setPiWalletAddress(e.target.value);
@@ -23,13 +23,13 @@ const PiInput = () => {
       setCanAddPiWalletAddress(true);
     } else {
       setCanAddPiWalletAddress(false);
-      setPiWalletAddress("");
+      setPiWalletAddress('');
     }
   }, [solValue]);
 
   useEffect(() => {
     if (!isConnected) {
-      setPiWalletAddress("");
+      setPiWalletAddress('');
     }
   }, [isConnected]);
 
