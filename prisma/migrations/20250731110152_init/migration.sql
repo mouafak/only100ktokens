@@ -22,6 +22,7 @@ CREATE TABLE `ClaimTransaction` (
     `feeAmount` VARCHAR(191) NOT NULL,
     `txHash` VARCHAR(88) NOT NULL,
     `isConfirmed` BOOLEAN NOT NULL DEFAULT false,
+    `isFailed` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
