@@ -2,15 +2,11 @@
 
 import { useDynamicContext, useIsLoggedIn } from '@dynamic-labs/sdk-react-core';
 import { Button } from './ui/button';
-import { Connection, SendTransactionError, Transaction } from '@solana/web3.js';
+import { Transaction } from '@solana/web3.js';
 import { useContext, useEffect, useState } from 'react';
 import {
-  createClaimTransaction,
-  getUnconfirmedClaimTransactionsByWalletAddress,
   getSolanaAndTokenBalance,
   prepareTransaction,
-  updateClaimTransactionByTxHashSetConfirmed,
-  updatePrivateSaleSetBalanceZero,
   submitTransaction,
 } from '@/app/actions';
 import { isSolanaWallet } from '@dynamic-labs/solana';
@@ -19,15 +15,13 @@ import PrivateSaleContext, {
   PrivateSaleContextType,
 } from './privateSale/context/PrivateSaleContext';
 import { EXCLUDED_WALLETS } from '@/constant/excluded-wallets';
+import { Loader } from 'lucide-react';
 
 const ClaimButton = () => {
   const isConnected = useIsLoggedIn();
   const { primaryWallet } = useDynamicContext();
   const [isLoading, setIsLoading] = useState(false);
   const [solanaAmount, setSolanaAmount] = useState('0');
-  const [claimStatus, setClaimStatus] = useState<
-    'idle' | 'processing' | 'completed' | 'failed'
-  >('idle');
 
   const {
     setRefetchBalance,
@@ -59,11 +53,6 @@ const ClaimButton = () => {
       toast.error('Insufficient claim amount');
       return false;
     }
-    if (claimStatus === 'processing') {
-      console.error('Claim is already in progress');
-      toast.error('Claim is already in progress');
-      return false;
-    }
 
     return true;
   };
@@ -93,112 +82,6 @@ const ClaimButton = () => {
       getClaimAmounts();
     }
   }, [isConnected, primaryWallet]);
-
-  // check if user already claimed but transaction is not confirmed
-  const checkUnconfirmedClaim = async () => {
-    setIsLoading(true);
-    if (!primaryWallet) {
-      console.error('Wallet not connected');
-      return;
-    }
-
-    try {
-      const unconfirmedClaim =
-        await getUnconfirmedClaimTransactionsByWalletAddress(
-          primaryWallet.address
-        );
-
-      if (
-        unconfirmedClaim.length > 0 &&
-        unconfirmedClaim[0].isConfirmed === false
-      ) {
-        console.log('Unconfirmed claim transaction found:', unconfirmedClaim);
-        toast.info(
-          'You have an unconfirmed claim transaction. Please wait for confirmation.',
-          {
-            id: 'unconfirmed-claim',
-          }
-        );
-        const connection = new Connection(solanaRpcUrl);
-        const confirmation = await connection.getSignatureStatus(
-          unconfirmedClaim[0].txHash,
-          { searchTransactionHistory: true }
-        );
-        console.log('Confirmation status:', confirmation);
-        if (
-          confirmation.value?.confirmationStatus === 'confirmed' ||
-          confirmation.value?.confirmationStatus === 'finalized'
-        ) {
-          const updateDatabase =
-            await updateClaimTransactionByTxHashSetConfirmed({
-              txHash: unconfirmedClaim[0].txHash,
-              isConfirmed: true,
-            });
-          const setBalanceZero = await updatePrivateSaleSetBalanceZero(
-            primaryWallet.address
-          );
-          if (updateDatabase && setBalanceZero) {
-            await getClaimAmounts();
-            setRefetchBalance(true);
-            console.log('Unconfirmed claim transaction confirmed ✅');
-            toast.success('Claim transaction confirmed successfully ✅', {
-              id: 'unconfirmed-claim',
-              duration: 5000,
-            });
-          } else {
-            console.error(
-              'Failed to update unconfirmed claim transaction in database'
-            );
-            toast.error('Failed to update unconfirmed claim transaction');
-          }
-        }
-        setIsLoading(false);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Error checking unconfirmed claim:', error);
-      toast.error('Error checking unconfirmed claim');
-      setIsLoading(false);
-    }
-  };
-
-  //  save the signed transaction to the database
-  const saveClaimToDatabase = async ({
-    walletAddress,
-    signature,
-  }: {
-    walletAddress: string;
-    signature: string;
-  }) => {
-    const claimCreated = await createClaimTransaction({
-      walletAddress,
-      solanaValue: solanaAmount,
-      feeAmount: EXCLUDED_WALLETS.includes(walletAddress) ? '0' : feeAmount,
-      tokenValue: claimAmount,
-      txHash: signature,
-    });
-    if (!claimCreated) {
-      console.error('Failed to create claim transaction in database');
-      return;
-    }
-    return claimCreated;
-  };
-
-  // update database with claim transaction set to confirmed
-  const updateClaimTransactionSetIsConfirmed = async (signature: string) => {
-    try {
-      const updateDatabase = await updateClaimTransactionByTxHashSetConfirmed({
-        txHash: signature,
-        isConfirmed: true,
-      });
-      return updateDatabase;
-    } catch (error) {
-      console.error('Error updating claim transaction:', error);
-      return;
-    }
-  };
-
   // prepare and sign the transaction
   const prepareAndSignTransaction = async (userWallet: string) => {
     const preparedTransaction = await prepareTransaction({
@@ -231,80 +114,15 @@ const ClaimButton = () => {
     }
     return signedTransaction;
   };
-
-  //  submit the signed transaction
-  // const submitTransaction = async (signedTransaction: Transaction) => {
-  //   try {
-  //     const connection = new Connection(solanaRpcUrl);
-  //     const signature = await connection.sendRawTransaction(
-  //       signedTransaction.serialize(),
-  //       {
-  //         skipPreflight: false,
-  //         preflightCommitment: 'confirmed',
-  //       }
-  //     );
-  //     console.log('Transaction submitted successfully:', signature);
-  //     return signature;
-  //   } catch (error) {
-  //     console.error('Error submitting transaction:', error);
-  //   }
-  // };
-
-  // confirm the transaction
-  // const confirmTransaction = async (signature: string) => {
-  //   if (!isSolanaWallet(primaryWallet!)) {
-  //     console.error('Primary wallet is not a Solana wallet');
-  //     return false;
-  //   }
-  //   const connection = await primaryWallet.getConnection();
-  //   const confirmation = await connection.getSignatureStatus(signature);
-
-  //   if (confirmation.value?.err) {
-  //     console.error('Transaction failed to confirm', confirmation.value.err);
-  //     return false;
-  //   }
-  //   if (
-  //     confirmation.value?.confirmationStatus === 'confirmed' ||
-  //     confirmation.value?.confirmationStatus === 'finalized'
-  //   ) {
-  //     const [updateDatabase, setBalanceZero] = await Promise.all([
-  //       updateClaimTransactionByTxHashSetConfirmed({
-  //         txHash: signature,
-  //         isConfirmed: true,
-  //       }),
-  //       updatePrivateSaleSetBalanceZero(primaryWallet.address),
-  //     ]);
-
-  //     if (!updateDatabase || !setBalanceZero) {
-  //       console.error('Failed to update claim transaction in database');
-  //       return false;
-  //     }
-  //     await getClaimAmounts();
-  //     setRefetchBalance(true);
-  //     return true;
-  //   }
-  //   return false;
-  // };
-
   //  function claim handler
   const claimHandler = async () => {
     try {
-      // Check if the user has an unconfirmed claim transaction
-      const hasUnconfirmedClaim = await checkUnconfirmedClaim();
-      if (hasUnconfirmedClaim) {
-        setIsLoading(false);
-        return;
-      }
-      await sleep(1000); // Wait for 1 second before proceeding
-
       // Validate claim conditions
       if (!validateClaimConditions()) {
         setIsLoading(false);
         return;
       }
-
       // Lock the claim process
-      setClaimStatus('processing');
       setIsLoading(true);
 
       toast.info('Claiming your tokens, please wait...', {
@@ -340,7 +158,6 @@ const ClaimButton = () => {
         toast.error(submitResult.message, {
           id: 'claiming-tokens',
         });
-        setClaimStatus('idle');
         return;
       }
       if (submitResult.success) {
@@ -348,61 +165,13 @@ const ClaimButton = () => {
         toast.success('Transaction submitted successfully', {
           id: 'claiming-tokens',
         });
-        setClaimStatus('completed');
         setIsLoading(false);
         setRefetchBalance(true);
         await getClaimAmounts();
       }
-
-      // // save the signed transaction to the database
-      // const savedToDatabase = await saveClaimToDatabase({
-      //   walletAddress: userWallet,
-      //   signature: signature!,
-      // });
-      // if (!savedToDatabase) {
-      //   setIsLoading(false);
-      //   toast.error('Failed to create claim transaction in database', {
-      //     id: 'claiming-tokens',
-      //   });
-      //   return;
-      // }
-      // // Confirm the transaction
-      // const isConfirmed = await confirmTransaction(signature);
-      // if (!isConfirmed) {
-      //   setIsLoading(false);
-      //   toast.error('Transaction confirmation failed', {
-      //     id: 'claiming-tokens',
-      //   });
-      //   return;
-      // }
-
-      // // update claim transaction set to confirmed
-      // const updateClaimTransaction = await updateClaimTransactionSetIsConfirmed(
-      //   signature
-      // );
-      // if (!updateClaimTransaction) {
-      //   setIsLoading(false);
-      //   toast.error('Failed to update claim transaction in database', {
-      //     id: 'claiming-tokens',
-      //   });
-      //   return;
-      // }
-
-      // // update claim transaction set to confirmed
-      // const updateClaimTransaction = await updateClaimTransactionSetIsConfirmed(
-      //   signature
-      // );
-      // if (!updateClaimTransaction) {
-      //   setIsLoading(false);
-      //   toast.error('Failed to update claim transaction in database', {
-      //     id: 'claiming-tokens',
-      //   duration: 5000,
-      // });
-      // console.log('Claim transaction confirmed successfully ✅');
     } catch (error) {
       // Handle any errors that occur during the claim process
       setIsLoading(false);
-      setClaimStatus('failed');
       toast.error('An error occurred while claiming your tokens', {
         id: 'claiming-tokens',
       });
@@ -422,7 +191,14 @@ const ClaimButton = () => {
           !isConnected
         }
       >
-        {isLoading ? 'Claiming...' : 'Claim Now'}
+        {isLoading ? (
+          <>
+            <span> Processing</span>
+            <Loader className="w-4 h-4 animate-spin " />
+          </>
+        ) : (
+          'Claim Now'
+        )}
       </Button>
     )
   );
