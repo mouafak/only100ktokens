@@ -34,6 +34,7 @@ model ClaimTransaction {
   feeAmount     String
   txHash        String   @unique @db.VarChar(88)
   isConfirmed   Boolean  @default(false)
+  isFailed      Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }

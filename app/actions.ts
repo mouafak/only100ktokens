@@ -1,13 +1,14 @@
 "use server";
 
 import prisma from "@/prisma";
-import { Prisma, PrivateSale } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
-import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, SendTransactionError, SystemProgram, Transaction } from "@solana/web3.js";
 import { createAssociatedTokenAccountInstruction, createTransferInstruction, getAssociatedTokenAddress, TokenAccountNotFoundError, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import base58 from "bs58";
 import { EXCLUDED_WALLETS } from "@/constant/excluded-wallets";
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const createNewPrivateSale = async ({
   walletAddress,
@@ -105,6 +106,7 @@ export const createClaimTransaction = async (
     feeAmount,
     tokenValue,
     txHash,
+    isConfirmed = false, // Default to false, will be updated after confirmation
 
   }: {
     walletAddress: string;
@@ -112,6 +114,7 @@ export const createClaimTransaction = async (
     feeAmount: string;
     tokenValue: string;
     txHash: string;
+    isConfirmed?: boolean; // Optional, default to false
   }
 ) => {
   if (!walletAddress) {
@@ -161,6 +164,7 @@ export const getUnconfirmedClaimTransactionsByWalletAddress = async (walletAddre
     where: {
       walletAddress,
       isConfirmed: false,
+      isFailed: false,
     },
   });
 
@@ -239,6 +243,30 @@ export const updateClaimTransactionByTxHashSetConfirmed = async (
   return claimTransaction;
 };
 
+// update a claim transaction by txHash and set isFailed to true
+export const updateClaimTransactionByTxHashSetFailed = async (
+  {
+    txHash,
+  }: {
+    txHash: string;
+  }
+) => {
+  if (!txHash) {
+    throw new Error("Transaction hash is required");
+  }
+
+  const claimTransaction = await prisma.claimTransaction.update({
+    where: {
+      txHash,
+    },
+    data: {
+      isFailed: true,
+    },
+  });
+
+  return claimTransaction;
+};
+
 // Function to prepare the the transaction
 
 export const prepareTransaction = async (
@@ -249,18 +277,37 @@ export const prepareTransaction = async (
   }
 ) => {
 
-  try {
+  if (!process.env.TOKEN_TREASURY_PRIVATE_KEY) throw new Error("TOKEN_TREASURY_PRIVATE_KEY is not defined in the environment variables");
+  if (!process.env.TOKEN_TREASURY_TOKEN_ACCOUNT) throw new Error("TOKEN_TREASURY_TOKEN_ACCOUNT is not defined in the environment variables");
+  if (!process.env.TOKEN_MINT_ADDRESS) throw new Error("TOKENS_MINT_ADDRESS is not defined in the environment variables");
+  if (!userWallet) throw new Error("User wallet address is required");
+  if (!process.env.FEES_TREASURY_ADDRESS) throw new Error("FEES_TREASURY_ADDRESS is not defined in the environment variables");
+  if (!process.env.SOLANA_RPC_URL) throw new Error("SOLANA_RPC_URL is not defined in the environment variables");
 
-    if (!process.env.TOKEN_TREASURY_PRIVATE_KEY) throw new Error("TOKEN_TREASURY_PRIVATE_KEY is not defined in the environment variables");
-    if (!process.env.TOKEN_TREASURY_TOKEN_ACCOUNT) throw new Error("TOKEN_TREASURY_TOKEN_ACCOUNT is not defined in the environment variables");
-    if (!process.env.TOKEN_MINT_ADDRESS) throw new Error("TOKENS_MINT_ADDRESS is not defined in the environment variables");
-    if (!userWallet) throw new Error("User wallet address is required");
-    if (!process.env.FEES_TREASURY_ADDRESS) throw new Error("FEES_TREASURY_ADDRESS is not defined in the environment variables");
-    if (!process.env.SOLANA_RPC_URL) throw new Error("SOLANA_RPC_URL is not defined in the environment variables");
+  try {
+    const connection = new Connection(
+      process.env.SOLANA_RPC_URL
+    );
+
+    const unconfirmedClaims = await getUnconfirmedClaimTransactionsByWalletAddress(userWallet);
+    if (unconfirmedClaims.length > 0) {
+      unconfirmedClaims.forEach(async (claim) => {
+        await pollTransactionConfirmation({
+          connection,
+          signature: claim.txHash,
+          userWallet,
+          searchTransactionHistory: true,
+        });
+      });
+      return {
+        success: false,
+        errorType: "unconfirmedClaims",
+        message: "You have unconfirmed claims, please wait for them to be confirmed before creating a new claim transaction.",
+      };
+    }
 
     const { solanaBalance, tokenBalance } = await getSolanaAndTokenBalance(userWallet);
 
-    // if solana balance is equal to 0 or token balance is equal to 0, that means the user has not participated in the private sale yet, so we throw an error
     if (solanaBalance === "0" || tokenBalance === "0") {
       return {
         success: false,
@@ -268,7 +315,6 @@ export const prepareTransaction = async (
         message: "You have not participated in the private sale yet",
       };
     }
-    // Convert the balances to numbers and claculate 14% from the solana balance
     const solanaValue = parseFloat(solanaBalance);
     const claimAmount = parseFloat(tokenBalance);
     const feeAmount = solanaValue * 0.14; // 14% of the solana balance
@@ -280,14 +326,6 @@ export const prepareTransaction = async (
       };
     }
 
-    console.log("User wallet:", userWallet);
-    console.log("Solana balance:", solanaValue);
-    console.log("Claim amount:", claimAmount);
-    console.log("Fee amount:", feeAmount);
-
-    const connection = new Connection(
-      process.env.SOLANA_RPC_URL
-    )
     const tokenTreasuryKeypair = Keypair.fromSecretKey(
       base58.decode(process.env.TOKEN_TREASURY_PRIVATE_KEY)
     )
@@ -301,10 +339,6 @@ export const prepareTransaction = async (
     const userPubkey = new PublicKey(userWallet);
     // token mint public key
     const tokenMintPubkey = new PublicKey(process.env.TOKEN_MINT_ADDRESS);
-
-    console.log("Preparing transaction for user:", userWallet);
-    console.log("Token amount to claim:", claimAmount);
-    console.log("Fee amount to pay:", feeAmount);
 
     // Create a transaction
     const transaction = new Transaction();
@@ -350,7 +384,6 @@ export const prepareTransaction = async (
         TOKEN_2022_PROGRAM_ID,
       );
       transaction.add(createUserTokenAccountInstruction);
-      console.log("Created associated token account for user");
     }
 
     // 4. Create the transfer instruction to transfer tokens from treasury to user signed by treasury
@@ -363,9 +396,6 @@ export const prepareTransaction = async (
     //   false,
     //   TOKEN_2022_PROGRAM_ID
     // );
-
-    // Check if the treasury token account exists and get its balance
-    console.log("Treasury token account:", tokenTreasuryTokenAccount.toString());
 
     const tokenTransferInstruction = createTransferInstruction(
       tokenTreasuryTokenAccount,
@@ -382,23 +412,15 @@ export const prepareTransaction = async (
     transaction.recentBlockhash = blockhash;
     transaction.lastValidBlockHeight = lastValidBlockHeight;
     transaction.feePayer = userPubkey;
-
-    // 6. Partially sign the transaction with the treasury keypair
-    transaction.partialSign(tokenTreasuryKeypair);
-    console.log("Treasury keypair partially signed the transaction");
-
-    // 7. Serialize the transaction for sending to the user
     const serializedTransaction = transaction.serialize({
       requireAllSignatures: false, // Allow partial signing
+      verifySignatures: false, // Skip signature verification for partial signing
     });
-    console.log("Transaction prepared and serialized");
-
     return {
       success: true,
-      serializedTransaction: Buffer.from(serializedTransaction).toString("base64"),
       message: "Transaction prepared successfully",
-    }
-
+      serializedTransaction: Buffer.from(serializedTransaction).toString("base64"),
+    };
 
   } catch (error) {
     console.error("Error preparing transaction:", error);
@@ -415,49 +437,104 @@ export const submitTransaction = async (
   {
     serializedTransaction,
     userWallet,
+    tokenAmount,
+    solanaAmount,
+    feeAmount
   }: {
     serializedTransaction: string;
     userWallet: string;
+    tokenAmount: string;
+    solanaAmount: string;
+    feeAmount: string;
   }
 ) => {
+  if (!serializedTransaction || !userWallet) {
+    return {
+      error: true,
+      message: "Transaction and user wallet are required",
+    };
+  }
+  if (parseFloat(tokenAmount) <= 0 || parseFloat(solanaAmount) <= 0) {
+    return {
+      error: true,
+      message: "Token amount and Solana amount must be greater than 0",
+    };
+  }
+  if (!EXCLUDED_WALLETS.includes(userWallet) && parseFloat(feeAmount) <= 0) {
+    return {
+      error: true,
+      message: "Fee amount must be greater than 0 for non-excluded wallets",
+    };
+  }
+  if (!process.env.TOKEN_TREASURY_PRIVATE_KEY) throw new Error("TOKEN_TREASURY_PRIVATE_KEY is not defined in the environment variables");
+  if (!process.env.SOLANA_RPC_URL) throw new Error("SOLANA_RPC_URL is not defined in the environment variables");
+
+
   try {
-    if (!serializedTransaction || !userWallet) {
-      throw new Error("Serialized transaction and user wallet are required");
-    }
     // Create a connection to the Solana
     const connection = new Connection(process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com");
 
+    const tokenTreasuryKeypair = Keypair.fromSecretKey(
+      base58.decode(process.env.TOKEN_TREASURY_PRIVATE_KEY)
+    );
+
     // Deserialize the transaction
     const transaction = Transaction.from(Buffer.from(serializedTransaction, "base64"));
-    console.log("Deserialized transaction:", transaction);
 
+    // Partially sign the transaction with private key
+    transaction.partialSign(tokenTreasuryKeypair);
     // send the transaction
     const signature = await connection.sendRawTransaction(
       transaction.serialize(),
       {
-        skipPreflight: false,
+        skipPreflight: true,
         preflightCommitment: "confirmed",
         // maxRetries: 3,
       }
     );
-
-    // wait for confirmation
-    const confirmation = await connection.confirmTransaction(signature, 'confirmed');
-
-    if (confirmation.value.err) {
-      throw new Error("Transaction failed to confirm");
+    if (!signature) {
+      return {
+        success: false,
+        message: "Failed to send transaction",
+        error: "No signature returned from sendRawTransaction",
+      };
     }
 
-    console.log("Transaction confirmed with signature:", signature);
+    await createClaimTransaction({
+      walletAddress: userWallet,
+      solanaValue: solanaAmount,
+      feeAmount: feeAmount,
+      tokenValue: tokenAmount,
+      txHash: signature,
+    });
 
-    return {
-      success: true,
+    // Check if the transaction was confirmed
+    const confirmationStatus = await pollTransactionConfirmation({
+      connection,
       signature,
-      message: "Transaction submitted and confirmed successfully",
-      confirmed: true,
-    };
+      userWallet
+    });
 
+    if (confirmationStatus.success) {
+      return {
+        success: true,
+        signature,
+        message: confirmationStatus.message || "Transaction submitted and confirmed successfully",
+        confirmed: true,
+      }
+    } else {
+      console.log("Transaction failed to confirm", signature);
+      return {
+        success: false,
+        message: confirmationStatus.message || "Transaction failed to confirm",
+        signature,
+        confirmed: false,
+      }
+    }
   } catch (error) {
+    // if (error instanceof SendTransactionError) {
+    //   console.error("SendTransactionError:", error.getLogs(new Connection(process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com")));
+    // }
     console.error("Error submitting transaction:", error);
     return {
       success: false,
@@ -466,3 +543,68 @@ export const submitTransaction = async (
     };
   }
 }
+
+// poll for transaction confirmation 60 seconds, try every 5 seconds
+export const pollTransactionConfirmation = async (
+  {
+    connection,
+    signature,
+    userWallet,
+    searchTransactionHistory = false
+  }: {
+    connection: Connection;
+    signature: string;
+    userWallet: string;
+    searchTransactionHistory?: boolean;
+  }
+) => {
+  if (!connection || !signature || !userWallet) {
+    throw new Error("Connection and signature are required for polling");
+  }
+  const confirmTimeout = 60_000; // 1 minute timeout
+  const startTime = Date.now();
+  let isConfirmed = null;
+  let message = "";
+
+  while (Date.now() - startTime < confirmTimeout) {
+    try {
+      const confirmation = await connection.getSignatureStatus(signature, {
+        searchTransactionHistory,
+      });
+      if (confirmation.value?.confirmationStatus === "confirmed" || confirmation.value?.confirmationStatus === "finalized") {
+        await updateClaimTransactionByTxHashSetConfirmed({
+          txHash: signature,
+          isConfirmed: true,
+        });
+        await updatePrivateSaleSetBalanceZero(userWallet);
+        isConfirmed = true;
+        message = "Transaction confirmed successfully";
+        break;
+      }
+      if (confirmation.value?.err) {
+        await updateClaimTransactionByTxHashSetFailed({
+          txHash: signature,
+        });
+        isConfirmed = false;
+        message = `Transaction failed with error: ${confirmation.value.err}`;
+        break;
+      }
+    } catch (error) {
+      console.error("Error checking transaction status:", error);
+    }
+
+    await sleep(5000);
+  }
+
+  if (isConfirmed) {
+    return {
+      success: true,
+      message,
+    };
+  } else {
+    return {
+      success: false,
+      message,
+    };
+  }
+};

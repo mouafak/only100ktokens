@@ -11,6 +11,7 @@ import {
   prepareTransaction,
   updateClaimTransactionByTxHashSetConfirmed,
   updatePrivateSaleSetBalanceZero,
+  submitTransaction,
 } from '@/app/actions';
 import { isSolanaWallet } from '@dynamic-labs/solana';
 import { toast } from 'sonner';
@@ -203,7 +204,10 @@ const ClaimButton = () => {
     const preparedTransaction = await prepareTransaction({
       userWallet: userWallet,
     });
-    if (!preparedTransaction.success) {
+    if (
+      !preparedTransaction.success ||
+      !preparedTransaction.serializedTransaction
+    ) {
       console.error(
         'Failed to prepare transaction:',
         preparedTransaction.message
@@ -212,7 +216,7 @@ const ClaimButton = () => {
     }
 
     const transaction = Transaction.from(
-      Buffer.from(preparedTransaction.serializedTransaction!, 'base64')
+      Buffer.from(preparedTransaction.serializedTransaction, 'base64')
     );
 
     if (!isSolanaWallet(primaryWallet!)) {
@@ -229,58 +233,58 @@ const ClaimButton = () => {
   };
 
   //  submit the signed transaction
-  const submitTransaction = async (signedTransaction: Transaction) => {
-    try {
-      const connection = new Connection(solanaRpcUrl);
-      const signature = await connection.sendRawTransaction(
-        signedTransaction.serialize(),
-        {
-          skipPreflight: false,
-          preflightCommitment: 'confirmed',
-        }
-      );
-      console.log('Transaction submitted successfully:', signature);
-      return signature;
-    } catch (error) {
-      console.error('Error submitting transaction:', error);
-    }
-  };
+  // const submitTransaction = async (signedTransaction: Transaction) => {
+  //   try {
+  //     const connection = new Connection(solanaRpcUrl);
+  //     const signature = await connection.sendRawTransaction(
+  //       signedTransaction.serialize(),
+  //       {
+  //         skipPreflight: false,
+  //         preflightCommitment: 'confirmed',
+  //       }
+  //     );
+  //     console.log('Transaction submitted successfully:', signature);
+  //     return signature;
+  //   } catch (error) {
+  //     console.error('Error submitting transaction:', error);
+  //   }
+  // };
 
   // confirm the transaction
-  const confirmTransaction = async (signature: string) => {
-    if (!isSolanaWallet(primaryWallet!)) {
-      console.error('Primary wallet is not a Solana wallet');
-      return false;
-    }
-    const connection = await primaryWallet.getConnection();
-    const confirmation = await connection.getSignatureStatus(signature);
+  // const confirmTransaction = async (signature: string) => {
+  //   if (!isSolanaWallet(primaryWallet!)) {
+  //     console.error('Primary wallet is not a Solana wallet');
+  //     return false;
+  //   }
+  //   const connection = await primaryWallet.getConnection();
+  //   const confirmation = await connection.getSignatureStatus(signature);
 
-    if (confirmation.value?.err) {
-      console.error('Transaction failed to confirm', confirmation.value.err);
-      return false;
-    }
-    if (
-      confirmation.value?.confirmationStatus === 'confirmed' ||
-      confirmation.value?.confirmationStatus === 'finalized'
-    ) {
-      const [updateDatabase, setBalanceZero] = await Promise.all([
-        updateClaimTransactionByTxHashSetConfirmed({
-          txHash: signature,
-          isConfirmed: true,
-        }),
-        updatePrivateSaleSetBalanceZero(primaryWallet.address),
-      ]);
+  //   if (confirmation.value?.err) {
+  //     console.error('Transaction failed to confirm', confirmation.value.err);
+  //     return false;
+  //   }
+  //   if (
+  //     confirmation.value?.confirmationStatus === 'confirmed' ||
+  //     confirmation.value?.confirmationStatus === 'finalized'
+  //   ) {
+  //     const [updateDatabase, setBalanceZero] = await Promise.all([
+  //       updateClaimTransactionByTxHashSetConfirmed({
+  //         txHash: signature,
+  //         isConfirmed: true,
+  //       }),
+  //       updatePrivateSaleSetBalanceZero(primaryWallet.address),
+  //     ]);
 
-      if (!updateDatabase || !setBalanceZero) {
-        console.error('Failed to update claim transaction in database');
-        return false;
-      }
-      await getClaimAmounts();
-      setRefetchBalance(true);
-      return true;
-    }
-    return false;
-  };
+  //     if (!updateDatabase || !setBalanceZero) {
+  //       console.error('Failed to update claim transaction in database');
+  //       return false;
+  //     }
+  //     await getClaimAmounts();
+  //     setRefetchBalance(true);
+  //     return true;
+  //   }
+  //   return false;
+  // };
 
   //  function claim handler
   const claimHandler = async () => {
@@ -317,58 +321,84 @@ const ClaimButton = () => {
         });
         return;
       }
+      const serializedTransaction = Buffer.from(
+        signedTransaction.serialize({
+          requireAllSignatures: false,
+        })
+      ).toString('base64');
+      console.log('Base64 Transaction:', serializedTransaction);
       // submit the signed transaction
-      const signature = await submitTransaction(signedTransaction);
-      if (!signature) {
+      const submitResult = await submitTransaction({
+        serializedTransaction,
+        userWallet,
+        solanaAmount,
+        tokenAmount: claimAmount,
+        feeAmount: EXCLUDED_WALLETS.includes(userWallet) ? '0' : feeAmount,
+      });
+      if (submitResult.error && !submitResult.success) {
         setIsLoading(false);
-        toast.error('Failed to submit transaction', {
+        toast.error(submitResult.message, {
           id: 'claiming-tokens',
         });
         setClaimStatus('idle');
         return;
       }
-
-      // save the signed transaction to the database
-      const savedToDatabase = await saveClaimToDatabase({
-        walletAddress: userWallet,
-        signature: signature!,
-      });
-      if (!savedToDatabase) {
-        setIsLoading(false);
-        toast.error('Failed to create claim transaction in database', {
+      if (submitResult.success) {
+        console.log('Transaction submitted successfully:', submitResult);
+        toast.success('Transaction submitted successfully', {
           id: 'claiming-tokens',
         });
-        return;
-      }
-      // Confirm the transaction
-      const isConfirmed = await confirmTransaction(signature);
-      if (!isConfirmed) {
+        setClaimStatus('completed');
         setIsLoading(false);
-        toast.error('Transaction confirmation failed', {
-          id: 'claiming-tokens',
-        });
-        return;
+        setRefetchBalance(true);
+        await getClaimAmounts();
       }
 
-      // update claim transaction set to confirmed
-      const updateClaimTransaction = await updateClaimTransactionSetIsConfirmed(
-        signature
-      );
-      if (!updateClaimTransaction) {
-        setIsLoading(false);
-        toast.error('Failed to update claim transaction in database', {
-          id: 'claiming-tokens',
-        });
-        return;
-      }
+      // // save the signed transaction to the database
+      // const savedToDatabase = await saveClaimToDatabase({
+      //   walletAddress: userWallet,
+      //   signature: signature!,
+      // });
+      // if (!savedToDatabase) {
+      //   setIsLoading(false);
+      //   toast.error('Failed to create claim transaction in database', {
+      //     id: 'claiming-tokens',
+      //   });
+      //   return;
+      // }
+      // // Confirm the transaction
+      // const isConfirmed = await confirmTransaction(signature);
+      // if (!isConfirmed) {
+      //   setIsLoading(false);
+      //   toast.error('Transaction confirmation failed', {
+      //     id: 'claiming-tokens',
+      //   });
+      //   return;
+      // }
 
-      setIsLoading(false);
-      setClaimStatus('completed');
-      toast.success('Claim transaction confirmed successfully ✅', {
-        id: 'claiming-tokens',
-        duration: 5000,
-      });
-      console.log('Claim transaction confirmed successfully ✅');
+      // // update claim transaction set to confirmed
+      // const updateClaimTransaction = await updateClaimTransactionSetIsConfirmed(
+      //   signature
+      // );
+      // if (!updateClaimTransaction) {
+      //   setIsLoading(false);
+      //   toast.error('Failed to update claim transaction in database', {
+      //     id: 'claiming-tokens',
+      //   });
+      //   return;
+      // }
+
+      // // update claim transaction set to confirmed
+      // const updateClaimTransaction = await updateClaimTransactionSetIsConfirmed(
+      //   signature
+      // );
+      // if (!updateClaimTransaction) {
+      //   setIsLoading(false);
+      //   toast.error('Failed to update claim transaction in database', {
+      //     id: 'claiming-tokens',
+      //   duration: 5000,
+      // });
+      // console.log('Claim transaction confirmed successfully ✅');
     } catch (error) {
       // Handle any errors that occur during the claim process
       setIsLoading(false);
