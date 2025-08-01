@@ -46,17 +46,17 @@ const Balance = () => {
   }, [refetchBalance]);
 
   return (
-    <div className="bg-custom-blue h-10">
+    <div className="bg-custom-blue border py-1">
       <div className="w-full h-full flex-center gap-2">
-        <p className="text-sm font-semibold text-white">Your Balance :</p>
-        <p className="text-sm font-semibold text-gold flex gap-1">
+        <p className="text-xs text-white">Your Balance :</p>
+        <p className="text-xs font-semibold text-gold flex flex-center gap-1">
           {balance}
           {/* <span className="text-[9px] font-bold text-custom-yellow ">
             <span>O100K</span>
           </span> */}
           <Image
             loading={'lazy'}
-            className="w-14"
+            className="w-12"
             src={Only100KLogo}
             alt="Logo"
           />

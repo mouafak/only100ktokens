@@ -18,6 +18,7 @@ import { Input } from '../ui/input';
 import TokenAmount from '../claim/token-amount';
 import ClaimFees from '../claim/claim-fees';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import ProgressBar from './progress-bar';
 
 const PrivateSaleForm = () => {
   return (
@@ -38,8 +39,8 @@ const PrivateSaleForm = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="privateSale" className="bg-blueSombre">
-          <div className="w-full p-1 flex flex-col gap-2">
-            <div className="w-full h-full bg-blueSombre p-6 flex flex-col justify-between gap-4">
+          <div className="w-full flex flex-col gap-2">
+            <div className="w-full h-full bg-blueSombre p-6 flex flex-col justify-between gap-2">
               <div className="flex-center flex-col">
                 <p className="text-xl uppercase">Private Sale</p>
                 <Image
@@ -49,7 +50,7 @@ const PrivateSaleForm = () => {
                   alt="Logo"
                 />
                 <div>
-                  <p className="text-custom-blue-green text-center text-xs font-semibold text-gold ">
+                  <p className="text-custom-blue-green text-center text-xs text-gold ">
                     ✨ More than 10K PI Network tokens to earn ✨ <br />
                     <span className="">
                       you contribute <span className="text-sm"> 1️⃣ </span> SOL
@@ -68,6 +69,7 @@ const PrivateSaleForm = () => {
                 <div>
                   <PiInput />
                 </div>
+                <ProgressBar />
               </div>
               <ConnectButton />
               <BuyButton />

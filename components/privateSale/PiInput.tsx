@@ -34,11 +34,11 @@ const PiInput = () => {
   }, [isConnected]);
 
   return (
-    <div className="pt-2">
-      <Label> Your PI wallet address </Label>
+    <div className="pt-1">
+      {/* <Label className="text-xs"> Your PI wallet address </Label> */}
       <Input
         type="text"
-        className=" bg-soft  rounded-none border-none placeholder:text-xs"
+        className=" bg-soft  rounded-none border-none placeholder:text-xs h-auto"
         placeholder="Insert Your Pi Address Wallet here ..."
         disabled={!isConnected || !canAddPiWalletAddress}
         value={piWalletAddress}
