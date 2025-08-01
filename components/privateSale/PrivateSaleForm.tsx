@@ -60,7 +60,7 @@ const PrivateSaleForm = () => {
                 </div>
               </div>
               <Balance />
-              <div className="flex flex-col justify-center gap-1 relative">
+              <div className="flex flex-col justify-center gap-1 relative mb-4">
                 <SolanaInput />
                 <TokenInput />
                 <div className=" absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex-center bg-custom-yellow p-1 ">
