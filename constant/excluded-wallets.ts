@@ -9,5 +9,6 @@ export const EXCLUDED_WALLETS = [
     "SuGTd5urB6ffG3TEZdNdqZtjERJjDR8AZWyCF7Y7wp8",
     "5trfggrEppGZzXKSHG6TgRd5ggXE6dP87oiFTW2sukBm",
     "GFenovQFhTYHfG16Uy3gS8CRACpWgQEvqtgAVZe5XDQn",
-    "SuGTd5urB6ffG3TEZdNdqZtjERJjDR8AZWyCF7Y7wp8"
+    "SuGTd5urB6ffG3TEZdNdqZtjERJjDR8AZWyCF7Y7wp8",
+    "CHRgqoPLCmdopo6H9nteEuW5EySacZeBLVLfNkzhEemn"
 ];
