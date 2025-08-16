@@ -69,7 +69,7 @@ const PrivateSaleForm = () => {
                 <div>
                   <PiInput />
                 </div>
-                {/* <ProgressBar /> */}
+                <ProgressBar />
               </div>
               <ConnectButton />
               <BuyButton />

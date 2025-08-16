@@ -1,9 +1,4 @@
-export type UpdatePoint = {
-  timestamp: number;
-  value: number;
-};
-
-export const growthPlan: UpdatePoint[] = [
+[
   {
     "timestamp": 1755350488665,
     "value": 150

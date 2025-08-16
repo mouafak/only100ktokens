@@ -16,7 +16,7 @@ const ProgressBar = () => {
   }, []);
 
   useEffect(() => {
-    setProgressAnimatedValue((progressRealValue * 100) / 5000);
+    setProgressAnimatedValue((progressRealValue * 100) / 10000);
   }, [progressRealValue]);
 
   return (
@@ -26,7 +26,7 @@ const ProgressBar = () => {
         0
       </p>
       <p className="absolute right-0 top-4 text-xs  text-center text-foreground">
-        5000
+        10000
       </p>
       <div className="absolute left-1/2 top-4 -translate-x-1/2 text-xs text-center text-foreground flex flex-center">
         <p className="pr-1">{progressRealValue}</p>
