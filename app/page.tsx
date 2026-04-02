@@ -10,7 +10,7 @@ export default function Home() {
       <div className=" h-full w-full flex flex-col justify-between items-center">
         <div className="h-full w-full bg-blueSombre max-h-20 ">
           <div className="flex justify-between items-center container h-full">
-            <Link passHref href={'https://only100ktokens.com/'}>
+            <Link passHref href={'https://100ktokens.com/'}>
               <Image
                 loading={'lazy'}
                 className="w-32 lg:w-44"
@@ -18,7 +18,7 @@ export default function Home() {
                 alt="Logo"
               />
             </Link>
-            <Link href={'https://only100ktokens.com/'}>
+            <Link href={'https://100ktokens.com/'}>
               <div className="flex gap-1 items-center">
                 <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 stroke-white " />
                 <p className="text-white text-sm md:text-base">Back to Home</p>
@@ -30,7 +30,7 @@ export default function Home() {
           <PrivateSaleForm />
         </div>
         <div className="h-12 w-full bg-none bg-blueSombre flex-center text-sm ">
-          © Only100Ktokens 2025
+          ©100Ktokens 2025
         </div>
       </div>
     </main>
