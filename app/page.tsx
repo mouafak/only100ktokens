@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <main className="flex-center w-full h-screen  bg-blueDarken bg-no-repeat bg-cover font-electrolize ">
       <div className=" h-full w-full flex flex-col justify-between items-center">
-        <div className="h-full w-full bg-blueSombre max-h-20 ">
+        <div className="h-full w-full bg-blueSombre max-h-20 flex items-center justify-center ">
           <div className="flex justify-between items-center container h-full">
             <Link passHref href={'https://100ktokens.com/'}>
               <Image
